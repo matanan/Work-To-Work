@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="he" ng-app="registration">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src ="/javascripts/registrationScript.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+
+    <link rel="stylesheet" href='/stylesheets/registration.css' />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
+    
+</head>
+
+<body dir="rtl" ng-controller="RegistrationController as regCtrl">
+
+<div class="container">
+    <div class="row" id="header">
+        <div class="col-md-3">
+            <h1>Work-To-Work</h1>
+        </div>
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <h3 id="exist">משתמש רשום:</h3>
+            <form id="form">
+                <input required type="email" placeholder="מייל" name="email" id="formreg" ng-model="loginObj.userName">
+                <input required type="password" placeholder="סיסמא" name="pass" id ="formreg" ng-model="loginObj.password">
+                <input type="submit" value="כניסה" ng-click="enter()">
+                <a href="profile">פרופיל</a>
+            </form>
+        </div>
+    </div>
+    <hr>
+
+    <div class="row" id="main">
+        <div class="col-md-5" id="exp">
+            <h3>בעל מקצוע?
+                <br/><br/>
+                מענויין להצטרף לרשת חברתית של בעלי מקצועות בלבד?
+                <br/><br/>
+                הגעת למקום הנכון!
+                <br/><br/>
+                ברשת חברתית זו תוכל למצוא בעלי מקצוע שיעשו בשבילך את העבודה ובתמורה אתה תעשה להם!
+            </h3>
+        </div>
+        <div class="col-md-2">
+
+        </div>
+        <div class="col-md-5">
+
+            <h2>&nbsp יצירת משתמש חדש</h2>
+            <div class="col-md-12">
+                <form id="formreg">
+                <input required type="text" placeholder="שם פרטי" name="firstname" ng-model="userObj.firstname">
+                <input required type="text" placeholder="שם משפחה" name="lastname" ng-model="userObj.lastname"> <br/><br/>
+                <input required type="email" placeholder="מייל" name="emailnew" ng-model="userObj.emailnew">
+                <input required type="tel" placeholder="מספר טלפון" name="phoneNumber" ng-model="userObj.phoneNumber"> <br/><br/>
+                <input required type="text" placeholder="עיר" name="location" ng-model="userObj.location"><br/><br/>
+                <input required type="text" placeholder="מקצוע" name="subject" ng-model="userObj.subject">
+                <input required type="number" placeholder="שנות ותק" min="0" name="seniority" ng-model="userObj.seniority"> <br/><br/>
+                <input required type="password" placeholder="סיסמא" name="passnew" ng-model="userObj.passnew">
+                <input required type="password" placeholder="אימות סיסמא" name="repassnew" ng-model="userObj.repassnew"> <br/><br/>
+                תאריך לידה:                 <br/>
+                <input required type="date" name="birthdate" ng-model="userObj.bDate"> <br/><br/><br/>
+                <input href="profile" type="submit" value="צור משתמש" ng-click="checkForm()">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<div class="container">
+<footer>
+    <div class="row" id="footer">
+        <div class="col-md-7">
+            <h6>&nbsp &#174 MATAN ANTEBI &#174;</h6>
+        </div>
+
+
+    </div>
+</footer>
+</div>
+</html>
