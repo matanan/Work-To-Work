@@ -29,7 +29,7 @@ angular.module('profile', [])
         $scope.RecObj.rank = "";
         $scope.RecObj.description = "";
         $scope.RecObj.mail = "";
-
+        // This function add a recommendation to the DB
         $scope.addRec = function () {
             // Get the ranking value
             var rate_value;

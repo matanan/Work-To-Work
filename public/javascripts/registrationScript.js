@@ -1,13 +1,10 @@
-/**
- * Created by מתן on 15/12/2016.
- */
-
 angular.module('registration', [])
     .controller('RegistrationController',['$scope', '$http', '$window', function($scope, $http, $window){
         // Name of Tab
         document.title = "Work-To-Work";
         var formIsFull = false;
         var equalsPass = false;
+        var exist = false;
 
         // Create the fields for the Object "user"
         $scope.userObj = {};
@@ -25,18 +22,19 @@ angular.module('registration', [])
         $scope.loginObj = {};
         $scope.loginObj.userName = "";
         $scope.loginObj.password = "";
+
         // Get method that takes out the wanted information from DB about user when one is logging in
         $scope.enter = function(){
             console.log($scope.loginObj);
             $http.get('/getUser')
                 .success(function (res) {
-                    for(var i = 0; i < res.length; i++)
-                    {
-                        console.log(res[i]);
-                        if(res[i].email == $scope.loginObj.userName)
-                        {
+                    for(var i = 0; i < res.length; i++) {
+                        if(res[i].email == $scope.loginObj.userName) {
+                            exist = true;
                             if(res[i].pass == $scope.loginObj.password) {
+                                // Get into the profile page
                                 $window.location.href = "/profile";
+                                // Save data in LocalStorage so I can use it later in the page
                                 localStorage.setItem("titleName", res[i].sirName);
                                 localStorage.setItem("titleLastName", res[i].familyName);
                                 localStorage.setItem("titleLocation", res[i].location);
@@ -46,6 +44,8 @@ angular.module('registration', [])
                                 alert('Incorrect password');
                         }
                     }
+                    if (exist == false)
+                        alert('Email Incorrect - User is not exist');
                 })
                 .catch(function (err) {
                     console.log(err);
@@ -87,11 +87,10 @@ angular.module('registration', [])
                             $scope.userObj.bDate = "";
                             // Unit test - print to the log
                             console.log('User added successfully');
+                            alert("משתמש נוסף בהצלחה");
                       })
                      .catch(function(err) {
                           console.log('User add error');
                     });
                 }
-
         }]);
-

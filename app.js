@@ -10,7 +10,7 @@ var users = require('./routes/users');
 var registration = require('./routes/registration');
 var profile = require('./routes/profile');
 
-
+// Connect to the DB
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 mongoose.connect('mongodb://matanan:Matan123@ds052819.mlab.com:52819/worktowork');
@@ -20,13 +20,11 @@ db.once('open', function() {
   console.log('Connection succeded');
 });
 
-
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -52,7 +50,6 @@ var userSchema = new Schema({
 });
 var User = mongoose.model('User', userSchema);
 
-
 // Schema for Recommendations
 var recSchema = new Schema ({
   rank: Number,
@@ -61,7 +58,7 @@ var recSchema = new Schema ({
 });
 var Recommendation = mongoose.model('Recommendations', recSchema);
 
-// Posting new recommendation to the DB
+// Posting a new recommendation to the DB
 app.post('/addRec', function (req, res) {
     console.log(req.body);
   new Recommendation({
@@ -76,7 +73,6 @@ app.post('/addRec', function (req, res) {
       console.log('Recommendation added successfully');
     }
   });
-  
 });
 
 // Posting a new user to the DB
@@ -101,6 +97,7 @@ app.post('/addUser',function (req, res) {
   });
 });
 
+// Get function - pull data about user from DB
 app.get('/getUser', function (req,res) {
   console.log(req.body);
   User.find(function(err, user){
