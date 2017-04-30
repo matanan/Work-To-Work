@@ -63,14 +63,16 @@
                 <input required type="text" placeholder="שם משפחה" name="lastname" ng-model="userObj.lastname"> <br/><br/>
                 <input required type="email" placeholder="מייל" name="emailnew" ng-model="userObj.emailnew">
                 <input required type="tel" placeholder="מספר טלפון" name="phoneNumber" ng-model="userObj.phoneNumber"> <br/><br/>
-                <input required type="text" placeholder="עיר" name="location" ng-model="userObj.location"><br/><br/>
+                <input required type="text" placeholder="עיר" name="location" ng-model="userObj.location">
+                <input required type="text" placeholder="שם העסק" name="businessName" ng-model="userObj.businessName">    <br/><br/>
                 <input required type="text" placeholder="מקצוע" name="subject" ng-model="userObj.subject">
                 <input required type="number" placeholder="שנות ותק" min="0" name="seniority" ng-model="userObj.seniority"> <br/><br/>
                 <input required type="password" placeholder="סיסמא" name="passnew" ng-model="userObj.passnew">
                 <input required type="password" placeholder="אימות סיסמא" name="repassnew" ng-model="userObj.repassnew"> <br/><br/>
+
                 תאריך לידה:                 <br/>
                 <input required type="date" name="birthdate" ng-model="userObj.bDate"> <br/><br/><br/>
-                <input href="profile" type="submit" value="צור משתמש" ng-click="checkForm()">
+                <input  type="submit" value="צור משתמש" ng-click="checkForm()">
                 </form>
             </div>
         </div>

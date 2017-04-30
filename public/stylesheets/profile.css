@@ -74,6 +74,7 @@ hr {
 }
 
 .box {
+    margin-top: 40px;
     margin-bottom: 20px;
     padding: 30px 15px;
     background: #fff;
@@ -220,4 +221,43 @@ label.star:hover { transform: rotate(-15deg) scale(1.3); }
 label.star:before {
     content: '\f006';
     font-family: FontAwesome, sans-serif;
+}
+
+#myBtn {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed/sticky position */
+    bottom: 20px; /* Place the button at the bottom of the page */
+    right: 10px; /* Place the button 30px from the right */
+    z-index: 99; /* Make sure it does not overlap */
+    border: none; /* Remove borders */
+    outline: none; /* Remove outline */
+    background-color: #2e6da4; /* Set a background color */
+    color: white; /* Text color */
+    cursor: pointer; /* Add a mouse pointer on hover */
+    padding: 15px; /* Some padding */
+    border-radius: 10px; /* Rounded corners */
+}
+
+#myBtn:hover {
+    background-color: #555; /* Add a dark-grey background on hover */
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout:fixed;
+}
+
+th, td {
+    border: 1px solid #dddddd;
+    text-align: right;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+#editProfile:hover {
+
 }

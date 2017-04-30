@@ -1,14 +1,19 @@
 <!DOCTYPE html>
-<html lang="he" ng-app="profile">
+<html lang="he" ng-app="visitProfile">
 
 <head>
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
     <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-    <script src="/javascripts/profileScript.js"></script>
+    <script src="/javascripts/visitProfile.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
+    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init("user_XYrfqMKEj5PsDwZYO2Ref");
+        })();
+    </script>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -31,12 +36,9 @@
 
 </head>
 
-<body dir="rtl" ng-controller="ProfileController as proCtrl">
+<body dir="rtl" ng-controller="VisitController as vstCtrl">
 
-<div class="brand" id="profile">
-    {{titleBusinessName}}
-    <input type="image" src="/images/edit.png" alt="Submit" title="Edit profile" ng-click="editProfile()" width="30" height="24">
-</div>
+<div class="brand" id="profile">{{titleBusinessName}}</div>
 <div class="address-bar">{{titleName}} {{titleLastName}} | {{titleLocation}} | {{titleSubject}}</div>
 
 <!-- Navigation -->
@@ -51,7 +53,7 @@
                 <span class="icon-bar"></span>
             </button>
             <!-- navbar-brand is hidden on larger screens, but visible when the menu is collapsed -->
-            <a class="navbar-brand" href="profile.ejs">Business Casual</a>
+            <a class="navbar-brand" href="visitProfile.ejs">Business Casual</a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" >
@@ -61,13 +63,16 @@
                     <a href="#" ng-click="clear()" >יציאה</a>
                 </li>
                 <li>
+                    <a href="#contact">צור קשר</a>
+                </li>
+                <li>
                     <a href="#recommendations">המלצות</a>
                 </li>
                 <li>
                     <a href="#work_pics">תיק עבודות</a>
                 </li>
                 <li>
-                    <a href="#profile">בית</a>
+                    <a href="#" ng-click="backToProfile()">לפרופיל שלי</a>
                 </li>
             </ul>
         </div>
@@ -75,60 +80,6 @@
 </nav>
 
 <div dir="rtl" class="container">
-
-    <div class="row">
-        <div class="box">
-            <div class="col-lg-12" id="search">
-                <hr>
-                <h2 class="intro-text text-center">
-                    <strong>חיפוש</strong>
-                </h2>
-                <hr>
-            </div>
-            <div class="col-lg-3">
-                <input type="text" placeholder="חיפוש לפי שם משתמש" id="searchName">
-            </div>
-            <div class="col-lg-3">
-                <input type="text" placeholder="חיפוש לפי מקצוע" id="searchSubject">
-            </div>
-            <div class="col-lg-3">
-                <input type="text" placeholder="חיפוש לפי מייל" id="searchMail">
-            </div>
-            <div class="col-lg-3">
-                <input type="text" placeholder="חיפוש לפי מיקום" id="searchLocation">
-            </div>
-            <div class="col-lg-12"><br></div>
-            <div class="row">
-              <div class="col-md-6">
-                 <input type="submit" class="btn btn-primary pull-right" ng-click="clearSearch()" value="נקה תוצאות" />
-              </div>
-            <div class="col-md-2">
-                <input type="submit" class="btn btn-primary pull-right" ng-click="search()" value="חפש" />
-            </div>
-            </div>
-            <div class="col-lg-12"><br></div>
-            <table>
-                <tr>
-                    <th>שם</th>
-                    <th>מיקום</th>
-                    <th>מקצוע</th>
-                    <th>טלפון</th>
-                </tr>
-            </table>
-            <div class="col-lg-12" ng-repeat="user in searchObj">
-                <table>
-                    <tr>
-                        <td><a href="#" ng-click="gotoVisit(user)"> {{user.sirName}} {{user.familyName}} {{user.emailNew}}</a></td>
-                        <td>{{user.location}}</td>
-                        <td>{{user.subject}}</td>
-                        <td>0{{user.phoneNumber}}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
-
-
     <div class="row">
         <div class="box">
             <div class="col-lg-12 text-center" id="work_pics">
@@ -166,10 +117,6 @@
                         <span class="icon-next"></span>
                     </a>
                 </div>
-                </br>
-                <div class="col-lg-12">
-                 <input type="submit" class="btn btn-primary text-center" ng-click="editPic()" value="עריכה" />
-                </div>
             </div>
         </div>
     </div>
@@ -192,7 +139,36 @@
                         &emsp;<b>ממליץ:  </b>{{owner.mail}}
                         <br><br><br>
                     </div>
+
+                    <!--  Review Form -->
+                    <h4>הכנס המלצה</h4>
+                    <div class="stars">
+                        <h5>דירוג:</h5>
+                        <form action="" ng-model="RecObj.rank" name="rank">
+                            <input class="star star-5" id="star-5" type="radio" name="star" value="5"/>
+                            <label class="star star-5" for="star-5"></label>
+                            <input class="star star-4" id="star-4" type="radio" name="star" value="4"/>
+                            <label class="star star-4" for="star-4"></label>
+                            <input class="star star-3" id="star-3" type="radio" name="star" value="3"/>
+                            <label class="star star-3" for="star-3"></label>
+                            <input class="star star-2" id="star-2" type="radio" name="star" value="2"/>
+                            <label class="star star-2" for="star-2"></label>
+                            <input class="star star-1" id="star-1" type="radio" name="star" value="1"/>
+                            <label class="star star-1" for="star-1"></label>
+                        </form>
+                    </div>
+
+                    <form class="form-group">
+                        <textarea required ng-model="RecObj.description" class="form-control" placeholder="חוות דעת קצרה על בעל המקצוע..." name="description"></textarea>
+                    </form>
+                    <form class="form-group">
+                        <input required type="email" ng-model="RecObj.mail" class="form-control" placeholder="מייל" name="mail"/>
+                    </form>
+                    <form class="form-group">
+                        <input type="submit" class="btn btn-primary pull-right" ng-click="addRec()" value="הכנס" />
+                    </form>
                 </form>
+
             </div>
         </div>
     </div>
@@ -204,28 +180,23 @@
                 <hr>
                 <h2 class="intro-text text-center">
                     <strong>צור קשר</strong>
+
                 </h2>
                 <hr>
                 <h3 class="intro-text text-center">
                     {{titleName}} {{titleLastName}}
                     </br></br>
-                    מספר טלפון: {{phoneNumber}}
+                    מספר טלפון: 0{{phoneNumber}}
                     </br></br>
                     כתובת מייל: {{owner}}
-                    </br></br></br></br>
+                    </br></br>
+                    <input type="submit" class="btn btn-primary pull-right" ng-click="sendEmail(owner, RecObj.mail)" value="שלח מייל" />
+                    </br></br>
                     <div class="col-lg-12 text-center" ng-repeat="contact in ContactObject">
                         {{contact.description}}
                         <br>
                     </div>
                 </h3>
-
-                    <form class="form-group">
-                    <textarea  ng-model="ContactObj.description" class="form-control" placeholder="כמה מילים על עצמך..." name="description"></textarea>
-                    </form>
-                <div class="col-md-2">
-                    <input type="submit" class="btn btn-primary pull-right" ng-click="addContact()" value="הכנס" />
-                </div>
-
             </div>
         </div>
     </div>

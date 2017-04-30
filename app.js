@@ -9,6 +9,7 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 var registration = require('./routes/registration');
 var profile = require('./routes/profile');
+var visitProfile = require('./routes/visitProfile');
 
 // Connect to the DB
 var mongoose = require('mongoose');
@@ -35,12 +36,14 @@ app.use('/', index);
 app.use('/users', users);
 app.use('/registration', registration);
 app.use('/profile', profile);
+app.use('/visitProfile', visitProfile);
 
 // Schema for Users
 var userSchema = new Schema({
   sirName: String,
   familyName: String,
   location: String,
+  businessName: String,
   phoneNumber: Number,
   email: String,
   pass: String,
@@ -52,16 +55,41 @@ var User = mongoose.model('User', userSchema);
 
 // Schema for Recommendations
 var recSchema = new Schema ({
+  owner: String,
   rank: Number,
   description: String,
   mail: String
 });
 var Recommendation = mongoose.model('Recommendations', recSchema);
 
+// Schema for contact
+var contactSchema = new Schema ({
+  description: String,
+  mail: String
+});
+var Contact = mongoose.model('Contact', contactSchema);
+
+// Posting contact to DB
+app.post('/addContact', function (req, res) {
+  console.log(req.body);
+  new Contact({
+    description: req.body.description,
+    mail: req.body.mail
+  }).save(function (err) {
+    if (err)
+        console.log(err);
+    else {
+      res.json('saved');
+      console.log('Contact added successfully');
+    }
+  });
+});
+
 // Posting a new recommendation to the DB
 app.post('/addRec', function (req, res) {
     console.log(req.body);
   new Recommendation({
+    owner: req.body.owner,
     rank: req.body.rank,
     description: req.body.description,
     mail: req.body.mail
@@ -81,6 +109,7 @@ app.post('/addUser',function (req, res) {
     sirName: req.body.firstname,
     familyName: req.body.lastname,
     location: req.body.location,
+    businessName: req.body.businessName,
     phoneNumber: req.body.phoneNumber,
     email: req.body.emailnew,
     pass: req.body.passnew,
@@ -102,6 +131,49 @@ app.get('/getUser', function (req,res) {
   console.log(req.body);
   User.find(function(err, user){
     res.json(user);
+  });
+});
+
+// Get function - pull data about recommendation from DB
+app.get('/getRec', function (req,res) {
+  console.log(req.body);
+  Recommendation.find(function(err, recommendation){
+    res.json(recommendation);
+  });
+});
+
+// Get function - pull data about Contacts from DB
+app.get('/getContact', function (req,res) {
+  console.log(req.body);
+  Contact.find(function(err, contact){
+    res.json(contact);
+  });
+});
+
+app.post('/updateContact', function(req, res){
+  Contact.findOne({ _id: req.body._id }, function(err, contact){
+    if(!err)
+    {
+      console.log(contact);
+      if(!contact)
+      {
+        console.log('Contact update error.1');
+      }
+      else
+      {
+        contact.description = req.body.description;
+        contact.mail = req.body.mail;
+        contact.save(function(err){
+          if(!err)
+          {
+            console.log('Contact updated');
+            res.json('Contact updated');
+          }
+          else
+            console.log('Contact update error.2');
+        });
+      }
+    }
   });
 });
 
