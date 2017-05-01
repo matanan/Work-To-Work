@@ -161,19 +161,14 @@ angular.module('visitProfile', [])
 
 
 
-        $scope.sendEmail = function (from, to) {
-            alert("Send email to" + from + "from" + to);
-            emailjs.send("gmail","Test",{
-                email: from,
-                notes: "Check this out!"
-            })
-                .then(
-                    function(response) {
-                        console.log("SUCCESS", response);
-                    },
-                    function(error) {
-                        console.log("FAILED", error);
-                    }
-                );
+        $scope.sendEmail = function (to,form_id) {
+            var myForm = document.getElementById("emailBody");
+            alert(to);
+
+
+            alert("Send email to " + to + " from" + "" + " form_id = " + myForm.id);
+            emailjs.sendForm("gmail","test",myForm.id);
+            // emailjs.send("gmail","test", {email:to});
+            // emailjs.sendForm("gmail","test",myForm.id, {email:to});
         };
     }]);
