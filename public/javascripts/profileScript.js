@@ -3,6 +3,7 @@ angular.module('profile', [])
         // Name of Tab
         document.title = "Work-To-Work - Profile";
         var localSAllow = false;
+        var contactExist = false;
         // Check if localStorage can be used
         localSAllow = !!window.localStorage;
         // Get the data from LocalStorage
@@ -132,7 +133,7 @@ angular.module('profile', [])
                         //console.log(res[i]);
                         if (res[i].owner == $scope.RecObj.owner) {
                             $scope.ownerObj.push(res[i]);
-                            console.log("owener objects: " + $scope.ownerObj);
+                            // console.log("owener objects: " + $scope.ownerObj);
                         }
                     }
                 })
@@ -226,32 +227,53 @@ angular.module('profile', [])
                     });
             }
         };
-
+        // New object - Contact object fields
         $scope.ContactObj = {};
         $scope.ContactObj.description = "";
         $scope.ContactObj.mail = $scope.owner;
+        // Array of contacts
+        $scope.ContactObject = [];
+
         // This function adds a contact of a user to the DB
         $scope.addContact = function () {
+            // Call "getContact" to check if record already exists
+            $scope.getContact();
             if ($scope.ContactObj.description == "") {
-                alert ("Emtpy field");
-                return;
+                // No input
+                alert ("Empty field");
+            }
+            else if(contactExist) {
+                // The record already exists in the database
+                alert("contact exists " + $scope.ContactObj.description + " owner = " + $scope.owner);
+                // Use the updateContact function for update one field in this object
+                $http.post('/updateContact', $scope.ContactObj)
+                    .success (function (res) {
+                        $scope.ContactObj.description = "";
+                        console.log('Contact updated successfully');
+                        alert("Contact updated successfully")
+                        location.reload();
+                })
+                    .catch(function (err) {
+                        console.log('Update contact error');
+                    })
             }
             else {
+                // New record in the database
+                alert("add new contact");
                 $http.post('/addContact', $scope.ContactObj)
                     .success(function (res) {
                         // If succeeded delete all fields
                         $scope.ContactObj.description = "";
                         console.log('Contact added successfully');
                         alert("Contact added successfully");
+                        location.reload();
                     })
                     .catch(function (err) {
                         console.log('Contact add error');
                     });
             }
-            $scope.getContact();
         };
 
-        $scope.ContactObject = [];
         // Retrieve contacts from DB
         $scope.getContact = function (){
             $http.get('/getContact')
@@ -260,7 +282,7 @@ angular.module('profile', [])
                         //console.log(res[i]);
                         //alert ("mail address: " + res[i].mail);
                         if (res[i].mail == $scope.ContactObj.mail) {
-
+                            contactExist = true;
                             $scope.ContactObject.push(res[i]);
                           //  alert($scope.ContactObject);
                             return;

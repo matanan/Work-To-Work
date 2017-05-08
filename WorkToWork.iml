@@ -9,5 +9,7 @@
     <orderEntry type="library" name="angular" level="application" />
     <orderEntry type="library" name="jquery-1.12.0" level="application" />
     <orderEntry type="library" name="jquery-migrate-1.2.1" level="application" />
+    <orderEntry type="library" name="ckeditor" level="application" />
+    <orderEntry type="library" name="ng-ckeditor" level="application" />
   </component>
 </module>

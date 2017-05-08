@@ -3,6 +3,11 @@ angular.module('visitProfile', [])
         // Name of Tab
         document.title = "Work-To-Work - visitProfile";
         var localSAllow = false;
+        // Loading gif until page finish loading
+        $(window).load(function() {
+            // Animate loader off screen
+            $(".se-pre-con").fadeOut("slow");
+        });
         // Check if localStorage can be used
         localSAllow = !!window.localStorage;
         // Get the data from LocalStorage
@@ -44,7 +49,7 @@ angular.module('visitProfile', [])
                         //console.log(res[i]);
                         if (res[i].owner == $scope.RecObj.owner) {
                             $scope.ownerObj.push(res[i]);
-                            console.log("owener objects: " + $scope.ownerObj);
+                            // console.log("owener objects: " + $scope.ownerObj);
                         }
                     }
                 })
@@ -159,16 +164,63 @@ angular.module('visitProfile', [])
             });
         };
 
+        $scope.ContactObject = [];
+        $scope.ContactObj = {};
+        $scope.ContactObj.description = "";
+        $scope.ContactObj.mail = $scope.owner;
 
-
-        $scope.sendEmail = function (to,form_id) {
-            var myForm = document.getElementById("emailBody");
-            alert(to);
-
-
-            alert("Send email to " + to + " from" + "" + " form_id = " + myForm.id);
-            emailjs.sendForm("gmail","test",myForm.id);
-            // emailjs.send("gmail","test", {email:to});
-            // emailjs.sendForm("gmail","test",myForm.id, {email:to});
+        // Retrieve contacts from DB
+        $scope.getContact = function (){
+            $http.get('/getContact')
+                .success(function (res) {
+                    for(var i = 0; i < res.length; i++) {
+                        //console.log(res[i]);
+                        //alert ("mail address: " + res[i].mail);
+                        if (res[i].mail == $scope.ContactObj.mail) {
+                            $scope.ContactObject.push(res[i]);
+                            //  alert($scope.ContactObject);
+                            return;
+                        }
+                    }
+                })
+                .catch(function (err) {
+                    console.log(err);
+                });
         };
-    }]);
+        $scope.getContact();
+
+
+
+        $scope.sendEmail = function (to) {
+            var myForm = document.getElementById("emailBody");
+            alert("Send email to " + to + " from" + "" + " form_id = " + myForm.id + " Text = " + CKEDITOR.instances.emailText.getData());
+            document.getElementById('emailText').value = CKEDITOR.instances.emailText.document.getBody().getText();
+            emailjs.sendForm("gmail","test",myForm.id);
+            // Clear text areas when finish
+            CKEDITOR.instances['emailText'].setData("");
+            document.getElementById('from').value = "";
+            document.getElementById('to').value = "";
+            // emailjs.send("gmail","test", {email:to});
+        };
+
+        //Initialize the Editor
+        initEditor();
+
+        //Replace the <textarea id="emailText"> with an CKEditor instance.
+        function initEditor()
+        {
+            CKEDITOR.replace( 'emailText', {
+
+                pluginsLoaded: function( evt )
+                {
+                    var doc = CKEDITOR.document, ed = evt.editor;
+                    if ( !ed.getCommand( 'bold' ) )
+                        doc.getById( 'exec-bold' ).hide();
+                    if ( !ed.getCommand( 'link' ) )
+                        doc.getById( 'exec-link' ).hide();
+                }
+            })
+        }
+
+
+}]);

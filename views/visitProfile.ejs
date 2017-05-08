@@ -14,6 +14,12 @@
                 emailjs.init("user_XYrfqMKEj5PsDwZYO2Ref");
             })();
     </script>
+    // For CK-EDITOR
+    <script src="https://cdn.ckeditor.com/4.6.2/standard/ckeditor.js"></script>
+
+    // For loader
+
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -25,6 +31,7 @@
 
     <!-- Bootstrap Core CSS -->
     <link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href='/stylesheets/profile.css' />
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
@@ -37,7 +44,7 @@
 </head>
 
 <body dir="rtl" ng-controller="VisitController as vstCtrl">
-
+<div class="se-pre-con"></div>
 <div class="brand" id="profile">{{titleBusinessName}}</div>
 <div class="address-bar">{{titleName}} {{titleLastName}} | {{titleLocation}} | {{titleSubject}}</div>
 
@@ -190,18 +197,20 @@
                     </br></br>
                     כתובת מייל: {{owner}}
                     </br></br>
-                    <form id="emailBody" class="form-email">
-                        <textarea required class="form-email" id="emailText" placeholder="שלח מייל..." name="text"></textarea>
-                        <input required type="email" class="form-email" placeholder="from" name="from"/>
-                        <input required type="email" class="form-email" placeholder="to" name="email"/>
-                        <input required type="text" class="form-email" placeholder="content" name="content"/>
-                    <input type="submit" class="btn btn-primary pull-right" ng-click="sendEmail(owner,this)" value="שלח מייל" />
-                    </form>
-                    </br></br>
                     <div class="col-lg-12 text-center" ng-repeat="contact in ContactObject">
+<b>על עצמי:</b>                        </br></br>
                         {{contact.description}}
                         <br>
                     </div>
+                    <form id="emailBody" class="form-email">
+                        <input required type="email" class="form-email" placeholder="from" name="from" id="from"/>
+                        <input required type="email" class="form-email" placeholder="to" name="email" id="to"/>
+                        <textarea required class="form-email" id="emailText" name="text"></textarea>
+                        </br>
+                    <input type="submit" class="btn btn-primary pull-right" ng-click="sendEmail(owner)" value="שלח מייל" />
+
+                    </form>
+                    </br></br>
                 </h3>
             </div>
         </div>

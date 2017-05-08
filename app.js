@@ -151,7 +151,7 @@ app.get('/getContact', function (req,res) {
 });
 
 app.post('/updateContact', function(req, res){
-  Contact.findOne({ _id: req.body._id }, function(err, contact){
+  Contact.findOne({ mail: req.body.mail }, function(err, contact){
     if(!err)
     {
       console.log(contact);
