@@ -15,20 +15,31 @@ angular.module('profile', [])
             $scope.titleSubject = localStorage.getItem("titleSubject");
             $scope.owner = localStorage.getItem("owner");
             $scope.phoneNumber = localStorage.getItem("phoneNumber");
-
+            $http.get('/getUSer')
+                .success (function (res) {
+                    for (var i=0; i<res.length; i++ ){
+                        if ($scope.owner == res[i].email)
+                            $scope.phoneNumber = res[i].phoneNumber;
+                    }
+                })
         };
         if (localSAllow)
             $scope.titles();
-
+        
         // If exit - clear the LocalStorage
         $scope.clear = function () {
-            if (confirm('האם אתה בטוח שברצונך לצאת?')) {
-                localStorage.clear();
-                alert("Local Storage is cleared");
-                window.location.href = "/registration";
-            } else {
-                window.location.href = "/profile";
-            }
+            swal({
+                    title: "האם את/ה בטוח/ה שברצונך לצאת?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "OK",
+                    closeOnConfirm: false
+                },
+                function(){
+                    localStorage.clear();
+                    window.location.href = "/registration";
+                });
         };
 
         $scope.searchObj = [];
@@ -43,7 +54,7 @@ angular.module('profile', [])
             console.log("name = " + name + " subject = " + subject + " email = " + email + " location = " + " user_location");
             // All fields are empty
             if (name == "" && subject == "" && email == "" && user_location == "") {
-                alert("Fill at least one field");
+                swal("אין נתונים", "מלא/י לפחות את אחד השדות לחיפוש");
                 return;
             }
             //Retrieve users from DB
@@ -51,28 +62,28 @@ angular.module('profile', [])
                 .success(function (res) {
                     for(var i = 0; i < res.length; i++) {
                         if(name != "") {
-                            if(!res[i].sirName.search(name)) {
+                            if((!res[i].sirName.search(name)) && res[i].email != $scope.owner) {
                                 $scope.searchObj.push(res[i]);
                                 console.log(res[i]);
                                 found = true;
                             }
                         }
                         else if(subject != "") {
-                            if (!res[i].subject.search(subject)) {
+                            if ((!res[i].subject.search(subject)) && res[i].email != $scope.owner) {
                                 $scope.searchObj.push(res[i]);
                                 console.log(res[i]);
                                 found = true;
                             }
                         }
                         else if(email != "") {
-                            if (!res[i].email.search(email)) {
+                            if ((!res[i].email.search(email)) && res[i].email != $scope.owner) {
                                 $scope.searchObj.push(res[i]);
                                 console.log(res[i]);
                                 found = true;
                             }
                         }
                         else if(user_location != "") {
-                            if (!res[i].location.search(user_location)) {
+                            if ((!res[i].location.search(user_location)) && res[i].email != $scope.owner) {
                                 $scope.searchObj.push(res[i]);
                                 console.log(res[i]);
                                 found = true;
@@ -82,7 +93,7 @@ angular.module('profile', [])
                     // No results has founded
                     if (!found)
                     {
-                        alert ("No results");
+                        swal("אין תוצאות", "אין תוצאות התואמות את נתוני החיפוש שהוכנסו");
                     }
                 })
                 .catch(function (err) {
@@ -107,7 +118,6 @@ angular.module('profile', [])
                     for(var i = 0; i < res.length; i++) {
                         //alert("res[i].email = " + res[i].email);
                         if (user.email == res[i].email) {
-                            alert("equal");
                             localStorage.setItem("titleName", res[i].sirName);
                             localStorage.setItem("titleLastName", res[i].familyName);
                             localStorage.setItem("titleLocation", res[i].location);
@@ -168,65 +178,8 @@ angular.module('profile', [])
         $scope.RecObj.owner = $scope.owner;
         $scope.RecObj.rank = "";
         $scope.RecObj.description = "";
-        $scope.RecObj.mail = "";
+        $scope.RecObj.name = "";
 
-        // This function adds a recommendation to the DB
-        $scope.addRec = function () {
-            var ok = true;
-            // Get the ranking value
-            var rate_value;
-            if (document.getElementById('star-1').checked) {
-                rate_value = document.getElementById('star-1').value;
-            }
-            if (document.getElementById('star-2').checked) {
-                rate_value = document.getElementById('star-2').value;
-            }
-            if (document.getElementById('star-3').checked) {
-                rate_value = document.getElementById('star-3').value;
-            }
-            if (document.getElementById('star-4').checked) {
-                rate_value = document.getElementById('star-4').value;
-            }
-            if (document.getElementById('star-5').checked) {
-                rate_value = document.getElementById('star-5').value;
-            }
-            $scope.RecObj.rank = rate_value;
-            if (rate_value == null)
-            {
-                alert("Please rank");
-                ok = false;
-            }
-            if ($scope.RecObj.description == "")
-            {
-                alert("Please write a description");
-                ok = false;
-            }
-            if (!validateEmail($scope.RecObj.mail))
-            {
-                alert("Email is empty or not valid");
-                ok = false;
-            }
-            if (ok) {
-                alert("ok = " + ok);
-                // All fields are full and the recommendation will be saved in the DB
-                $http.post('/addRec', $scope.RecObj)
-                    .success(function (res) {
-                        // If succeeded delete all fields
-                        $scope.RecObj.rank = "";
-                        $scope.RecObj.description = "";
-                        $scope.RecObj.mail = "";
-                        location.reload();
-                        // Unit test - print to the log
-                        console.log('Recommendation added successfully');
-                        alert("Recommendation added successfully");
-                        // Call the function that retrieve data about recommendations from DB
-                        $scope.getRec();
-                    })
-                    .catch(function (err) {
-                        console.log('Recommendation add error');
-                    });
-            }
-        };
         // New object - Contact object fields
         $scope.ContactObj = {};
         $scope.ContactObj.description = "";
@@ -234,14 +187,13 @@ angular.module('profile', [])
         // Array of contacts
         $scope.ContactObject = [];
 
+
+
         // This function adds a contact of a user to the DB
         $scope.addContact = function () {
             // Call "getContact" to check if record already exists
             $scope.getContact();
-            if ($scope.ContactObj.description == "") {
-                // No input
-                alert ("Empty field");
-            }
+            if ($scope.ContactObj.description == "") {swal( "אין נתונים", "מלא/י לפחות את אחד השדות לחיפוש"); }
             else if(contactExist) {
                 // The record already exists in the database
                 alert("contact exists " + $scope.ContactObj.description + " owner = " + $scope.owner);
@@ -250,9 +202,18 @@ angular.module('profile', [])
                     .success (function (res) {
                         $scope.ContactObj.description = "";
                         console.log('Contact updated successfully');
-                        alert("Contact updated successfully")
-                        location.reload();
-                })
+                        swal({
+                                title: "התוכן השתנה בהצלחה!",
+                                type: "success",
+                                confirmButtonColor: "#8CD4F5",
+                                confirmButtonText: "אישור"
+                            },
+                            function(isConfirm){
+                                // If confirmed call exit" function for update changes
+                                if (isConfirm) { location.reload(); }
+                            });
+
+                    })
                     .catch(function (err) {
                         console.log('Update contact error');
                     })
@@ -265,14 +226,23 @@ angular.module('profile', [])
                         // If succeeded delete all fields
                         $scope.ContactObj.description = "";
                         console.log('Contact added successfully');
-                        alert("Contact added successfully");
-                        location.reload();
+                        swal({
+                                title: "התוכן השתנה בהצלחה!",
+                                type: "success",
+                                confirmButtonColor: "#8CD4F5",
+                                confirmButtonText: "אישור"
+                            },
+                            function(isConfirm){
+                                // If confirmed call exit" function for update changes
+                                if (isConfirm) { location.reload(); }
+                            });
                     })
                     .catch(function (err) {
                         console.log('Contact add error');
                     });
             }
         };
+        
 
         // Retrieve contacts from DB
         $scope.getContact = function (){
@@ -292,16 +262,74 @@ angular.module('profile', [])
                 .catch(function (err) {
                     console.log(err);
                 });
+
         };
         $scope.getContact();
-
-        $scope.editPic = function () {
-          alert("EDIT PICTURES WILL BE IMPLEMENTED HERE");
+        
+        // Edit profile page
+        $scope.editProfile = function() {
+            window.location.href = "/editProfile";
         };
 
-        $scope.editProfile = function () {
-          alert("EDIT PROFILE");
+
+        // Setting for Google search API
+        var mapOptions = {
+            center: new google.maps.LatLng(-33.8688, 151.2195),
+            zoom: 13,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
         };
+        var map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+
+        var input = document.getElementById('searchLocation');
+        var autocomplete = new google.maps.places.Autocomplete(input);
+
+        autocomplete.bindTo('bounds', map);
+
+        var infowindow = new google.maps.InfoWindow();
+        var marker = new google.maps.Marker({
+            map: map
+        });
+
+        google.maps.event.addListener(autocomplete, 'place_changed', function () {
+            infowindow.close();
+            marker.setVisible(false);
+            input.className = '';
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                // Inform the user that the place was not found and return.
+                input.className = 'notfound';
+                return;
+            }
+
+            // If the place has a geometry, then present it on a map.
+            if (place.geometry.viewport) {
+                map.fitBounds(place.geometry.viewport);
+            } else {
+                map.setCenter(place.geometry.location);
+                map.setZoom(17); // Why 17? Because it looks good.
+            }
+            marker.setIcon( /** @type {google.maps.Icon} */ ({
+                url: place.icon,
+                size: new google.maps.Size(71, 71),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(17, 34),
+                scaledSize: new google.maps.Size(35, 35)
+            }));
+            marker.setPosition(place.geometry.location);
+            marker.setVisible(true);
+
+            var address = '';
+            if (place.address_components) {
+                address = [
+                    (place.address_components[0] && place.address_components[0].short_name || ''), (place.address_components[1] && place.address_components[1].short_name || ''), (place.address_components[2] && place.address_components[2].short_name || '')].join(' ');
+            }
+
+            infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+            infowindow.open(map, marker);
+        });
+
+
     }]);
 
 

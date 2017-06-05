@@ -51,6 +51,32 @@ body{
     font-weight: bold;
     letter-spacing: 3px;
 }
+ #forgetPassword{
+     color: white;
+ }
+input {
+    border: 1px solid rgba(0, 0, 0, 0.5);
+}
+input.notfound {
+    border: 2px solid rgba(255, 0, 0, 0.4);
+}
+#map-canvas, #map_canvas {
+    height: 100%;
+    width:100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

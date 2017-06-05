@@ -4,21 +4,28 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var multipart = require('connect-multiparty');
+var multipartMiddleware = multipart();
+
+var request = require('request');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 var registration = require('./routes/registration');
 var profile = require('./routes/profile');
 var visitProfile = require('./routes/visitProfile');
+var editProfile = require('./routes/editProfile');
+
 
 // Connect to the DB
 var mongoose = require('mongoose');
+var fs = require("fs");
 var Schema = mongoose.Schema;
 mongoose.connect('mongodb://matanan:Matan123@ds052819.mlab.com:52819/worktowork');
 var db = mongoose.connection;
 db.on('error', console.error);
 db.once('open', function() {
-  console.log('Connection succeded');
+  console.log('Connection succeeded');
 });
 
 var app = express();
@@ -26,7 +33,7 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -37,6 +44,7 @@ app.use('/users', users);
 app.use('/registration', registration);
 app.use('/profile', profile);
 app.use('/visitProfile', visitProfile);
+app.use('/editProfile', editProfile);
 
 // Schema for Users
 var userSchema = new Schema({
@@ -58,7 +66,8 @@ var recSchema = new Schema ({
   owner: String,
   rank: Number,
   description: String,
-  mail: String
+  name: String,
+  email: String
 });
 var Recommendation = mongoose.model('Recommendations', recSchema);
 
@@ -92,7 +101,8 @@ app.post('/addRec', function (req, res) {
     owner: req.body.owner,
     rank: req.body.rank,
     description: req.body.description,
-    mail: req.body.mail
+    name: req.body.name,
+    email: req.body.email
     }).save(function (err) {
     if(err)
       console.log(err);
@@ -150,22 +160,43 @@ app.get('/getContact', function (req,res) {
   });
 });
 
+app.post('/updateUser', function (req, res){
+  User.findOne({email: req.body.mail}, function (err, user) {
+    if (!err) {
+      console.log(user);
+      if (!user) { console.log('User update error.1'); }
+      else {
+        user.sirName = req.body.firstname;
+        user.familyName = req.body.lastname;
+        user.phoneNumber = req.body.phoneNumber;
+        user.location = req.body.location;
+        user.businessName = req.body.businessName;
+        user.subject = req.body.subject;
+        user.seniority = req.body.seniority;
+        user.pass = req.body.passnew;
+        user.save(function (err) {
+          if (!err) {
+            console.log('User updated');
+            res.json('User updated');
+          } else {
+            console.log('User update error.2');
+          }
+        })
+      }
+    }
+  })
+});
+
 app.post('/updateContact', function(req, res){
   Contact.findOne({ mail: req.body.mail }, function(err, contact){
-    if(!err)
-    {
+    if(!err) {
       console.log(contact);
-      if(!contact)
-      {
-        console.log('Contact update error.1');
-      }
-      else
-      {
+      if(!contact) { console.log('Contact update error.1'); }
+      else {
         contact.description = req.body.description;
         contact.mail = req.body.mail;
         contact.save(function(err){
-          if(!err)
-          {
+          if(!err) {
             console.log('Contact updated');
             res.json('Contact updated');
           }
@@ -175,6 +206,59 @@ app.post('/updateContact', function(req, res){
       }
     }
   });
+});
+
+// Update the password field in the User collection in DB
+app.post('/updatePassword', function(req, res){
+    User.findOne({ email: req.body.email }, function(err, user){
+        if(!err) {
+            console.log(user);
+            if(!user) { console.log('User password update error.1'); }
+            else {
+                user.pass = req.body.passnew;
+                user.save(function(err){
+                    if(!err) {
+                        console.log('User password updated');
+                        res.json('User password updated');
+                    }
+                    else
+                        console.log('User password update error.2');
+                });
+            }
+        }
+    });
+});
+
+// Schema for Recommendations
+var pictureSchema = new Schema ({
+    owner: String,
+    title: String,
+    data: String
+});
+
+var Picture = mongoose.model('Picture', pictureSchema);
+
+app.post('/uploadPic', multipartMiddleware, function(req, res) {
+    console.log("file = " + file);
+    var file = req.files.file;
+    var pic = new Picture;
+    var bitmap = fs.readFileSync(file.path);
+    pic.data = bitmap.toString('base64');
+    pic.title = req.body.title;
+    pic.owner = req.body.owner;
+    console.log(pic.data);
+    pic.save(function(err){
+        if(err)
+            throw err;
+        });
+    res.json('Picture saved.');
+});
+
+app.get('/getPic', function (req, res) {
+   Picture.find({owner: req.body.owner}, function (err, content) {
+       console.log("before = " + res);
+       res.json(content);
+   });
 });
 
 // catch 404 and forward to error handler
@@ -196,3 +280,5 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
+

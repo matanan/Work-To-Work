@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="he" ng-app="registration">
 <head>
+
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
     <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
@@ -12,13 +13,28 @@
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <!-- Latest compiled and minified JavaScript -->
+
+    <!--For Email-JS-->
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init("user_XYrfqMKEj5PsDwZYO2Ref");
+        })();
+    </script>
+
+    <!-- For Sweet-Alert -->
+    <script src="javascripts/sweetalert.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/sweetalert.css">
+
+    <!-- For Google Places API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDg8O70B_iJ-Kr2UkIua7pr65_akMvIIH0&libraries=geometry,places">
+    </script>
 
     <link rel="stylesheet" href='/stylesheets/registration.css' />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
-    
+
 </head>
 
 <body dir="rtl" ng-controller="RegistrationController as regCtrl">
@@ -35,6 +51,7 @@
                 <input required type="email" placeholder="מייל" name="email" id="formreg" ng-model="loginObj.userName">
                 <input required type="password" placeholder="סיסמא" name="pass" id ="formreg" ng-model="loginObj.password">
                 <input type="submit" value="כניסה" ng-click="enter()">
+                <a id="forgetPassword" href="#" ng-click="forgetPassword()">שכחת סיסמא?</a>
             </form>
         </div>
     </div>
@@ -63,8 +80,10 @@
                 <input required type="text" placeholder="שם משפחה" name="lastname" ng-model="userObj.lastname"> <br/><br/>
                 <input required type="email" placeholder="מייל" name="emailnew" ng-model="userObj.emailnew">
                 <input required type="tel" placeholder="מספר טלפון" name="phoneNumber" ng-model="userObj.phoneNumber"> <br/><br/>
-                <input required type="text" placeholder="עיר" name="location" ng-model="userObj.location">
-                <input required type="text" placeholder="שם העסק" name="businessName" ng-model="userObj.businessName">    <br/><br/>
+                <input required type="text" placeholder="שם העסק" name="businessName" ng-model="userObj.businessName">
+                <input required id="searchTextField" type="text" placeholder="עיר" name="location" ng-model="userObj.location"> <br/><br/>
+                <div id="map-canvas"></div>
+
                 <input required type="text" placeholder="מקצוע" name="subject" ng-model="userObj.subject">
                 <input required type="number" placeholder="שנות ותק" min="0" name="seniority" ng-model="userObj.seniority"> <br/><br/>
                 <input required type="password" placeholder="סיסמא" name="passnew" ng-model="userObj.passnew">

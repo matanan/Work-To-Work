@@ -26,13 +26,18 @@ angular.module('visitProfile', [])
 
         // If exit - clear the LocalStorage
         $scope.clear = function () {
-            if (confirm('האם אתה בטוח שברצונך לצאת?')) {
-                localStorage.clear();
-                alert("Local Storage is cleared");
-                window.location.href = "/registration";
-            } else {
-                window.location.href = "/profile";
-            }
+            swal({
+                    title: "האם את/ה בטוח/ה שברצונך לצאת?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "OK",
+                    closeOnConfirm: false
+                },
+                function(){
+                    localStorage.clear();
+                    window.location.href = "/registration";
+                });
         };
 
         // Email validation
@@ -63,65 +68,93 @@ angular.module('visitProfile', [])
         $scope.RecObj.owner = $scope.owner;
         $scope.RecObj.rank = "";
         $scope.RecObj.description = "";
-        $scope.RecObj.mail = "";
+        $scope.RecObj.name = "";
+        $scope.RecObj.email = "";
+
+        $scope.getRecName = function () {
+
+
+        };
 
         // This function adds a recommendation to the DB
         $scope.addRec = function () {
-            var ok = true;
-            // Get the ranking value
-            var rate_value;
-            if (document.getElementById('star-1').checked) {
-                rate_value = document.getElementById('star-1').value;
-            }
-            if (document.getElementById('star-2').checked) {
-                rate_value = document.getElementById('star-2').value;
-            }
-            if (document.getElementById('star-3').checked) {
-                rate_value = document.getElementById('star-3').value;
-            }
-            if (document.getElementById('star-4').checked) {
-                rate_value = document.getElementById('star-4').value;
-            }
-            if (document.getElementById('star-5').checked) {
-                rate_value = document.getElementById('star-5').value;
-            }
-            $scope.RecObj.rank = rate_value;
-            if (rate_value == null)
-            {
-                alert("Please rank");
-                ok = false;
-            }
-            if ($scope.RecObj.description == "")
-            {
-                alert("Please write a description");
-                ok = false;
-            }
-            if (!validateEmail($scope.RecObj.mail))
-            {
-                alert("Email is empty or not valid");
-                ok = false;
-            }
-            if (ok) {
-                alert("ok = " + ok);
-                // All fields are full and the recommendation will be saved in the DB
-                $http.post('/addRec', $scope.RecObj)
-                    .success(function (res) {
-                        // If succeeded delete all fields
-                        $scope.RecObj.rank = "";
-                        $scope.RecObj.description = "";
-                        $scope.RecObj.mail = "";
-                        location.reload();
-                        // Unit test - print to the log
-                        console.log('Recommendation added successfully');
-                        alert("Recommendation added successfully");
-                        // Call the function that retrieve data about recommendations from DB
-                        $scope.getRec();
-                    })
-                    .catch(function (err) {
-                        console.log('Recommendation add error');
-                    });
-            }
+            // Get the ranker's email address
+            $scope.from = localStorage.getItem("backUser");
+            // Get the ranker's name
+            $http.get('/getUser')
+                .success(function (res) {
+                    for(var i = 0; i < res.length; i++) {
+                        if ($scope.from == res[i].email) {
+                            $scope.RecObj.name = res[i].sirName;
+                            $scope.RecObj.email = res[i].email;
+                            break;
+                        }
+                    }
+                    var ok = true;
+                    // Get the ranking value
+                    var rate_value;
+                    if (document.getElementById('star-1').checked) {
+                        rate_value = document.getElementById('star-1').value;
+                    }
+                    if (document.getElementById('star-2').checked) {
+                        rate_value = document.getElementById('star-2').value;
+                    }
+                    if (document.getElementById('star-3').checked) {
+                        rate_value = document.getElementById('star-3').value;
+                    }
+                    if (document.getElementById('star-4').checked) {
+                        rate_value = document.getElementById('star-4').value;
+                    }
+                    if (document.getElementById('star-5').checked) {
+                        rate_value = document.getElementById('star-5').value;
+                    }
+                    $scope.RecObj.rank = rate_value;
+                    if (rate_value == null)
+                    {
+                        sweetAlert("שגיאה!", "לא הוכנס דירוג", "error");
+                        //alert("Please rank");
+                        ok = false;
+                    }
+                    else if ($scope.RecObj.description == "")
+                    {
+                        sweetAlert("שגיאה!", "נמק את דירוגך בכמה מילים", "error");
+                        //alert("Please write a description");
+                        ok = false;
+                    }
+                    // All fields are full and the recommendation will be saved in the DB
+                    else if (ok) {
+                        $http.post('/addRec', $scope.RecObj)
+                            .success(function (res) {
+                                // If succeeded delete all fields
+                                $scope.RecObj.rank = "";
+                                $scope.RecObj.description = "";
+                                // Unit test - print to the log
+                                console.log('Recommendation added successfully');
+                                swal({
+                                        title: "המלצה נוספה בהצלחה!",
+                                        type: "success",
+                                        confirmButtonText: "אישור"
+                                    }, function (isConfirm) {
+                                        if (isConfirm) {
+                                            // Call the function that retrieve data about recommendations from DB
+                                            $scope.getRec();
+                                            $.when(location.reload()).done(
+                                                $window.location.href="#recommendations"
+                                            );
+                                        }
+                                    });
+                                //alert("Recommendation added successfully");
+                            })
+                            .catch(function (err) {
+                                console.log('Recommendation add error');
+                            });
+                    }
+
+                }).catch(function (err) {
+                console.log(err);
+            });
         };
+
 
         // When the user scrolls down 20px from the top of the document, show the button
         window.onscroll = function() {scrollFunction()};
@@ -148,7 +181,6 @@ angular.module('visitProfile', [])
                     for(var i = 0; i < res.length; i++) {
                        // alert("res[i].email = " + res[i].email);
                         if ($scope.backTo == res[i].email) {
-                            alert("equal");
                             localStorage.setItem("titleName", res[i].sirName);
                             localStorage.setItem("titleLastName", res[i].familyName);
                             localStorage.setItem("titleLocation", res[i].location);
@@ -192,23 +224,51 @@ angular.module('visitProfile', [])
 
 
         $scope.sendEmail = function (to) {
+
+            // Get the sender's mail
+            $scope.from = localStorage.getItem("backUser");
             var myForm = document.getElementById("emailBody");
-            alert("Send email to " + to + " from" + "" + " form_id = " + myForm.id + " Text = " + CKEDITOR.instances.emailText.getData());
+            var editor_val = CKEDITOR.instances.emailText.document.getBody().getText();
+            //alert("Send email to " + to + " from " + $scope.from  + " form_id = " + myForm.id + " Text = " + CKEDITOR.instances.emailText.getData());
             document.getElementById('emailText').value = CKEDITOR.instances.emailText.document.getBody().getText();
-            emailjs.sendForm("gmail","test",myForm.id);
-            // Clear text areas when finish
-            CKEDITOR.instances['emailText'].setData("");
-            document.getElementById('from').value = "";
-            document.getElementById('to').value = "";
-            // emailjs.send("gmail","test", {email:to});
+            if (editor_val.length < 2) {
+                sweetAlert("שגיאה!", "אנא מלא את גוף ההודעה", "error");
+            }
+            else {
+                swal({
+                        title: "האם את/ה בטוח/ה שברצונך לשלוח מייל?",
+                        type: "info",
+                        showCancelButton: true,
+                        closeOnConfirm: false,
+                        showLoaderOnConfirm: true
+                    },
+                    function (isConfirm) {
+                        setTimeout(function () {
+                            if (isConfirm) {
+                                emailjs.send("gmail", "test", {
+                                    email: to,
+                                    from: $scope.from,
+                                    text: CKEDITOR.instances.emailText.document.getBody().getText()
+                                });
+                                swal("המייל נשלח בהצלחה!", "", "success");
+                                //Clear text areas when finish
+                                CKEDITOR.instances['emailText'].setData("");
+                            }
+                            else {
+                                swal("בוטל", "המייל לא נשלח", "error");
+                            }
+                        }, 2000);
+                    });
+            }
+             //emailjs.sendForm("gmail","test",myForm.id);
+
         };
 
         //Initialize the Editor
         initEditor();
 
         //Replace the <textarea id="emailText"> with an CKEditor instance.
-        function initEditor()
-        {
+        function initEditor() {
             CKEDITOR.replace( 'emailText', {
 
                 pluginsLoaded: function( evt )
@@ -223,4 +283,154 @@ angular.module('visitProfile', [])
         }
 
 
-}]);
+        $scope.searchObj = [];
+        $scope.search = function () {
+            // Clear the array after re-searching
+            $scope.searchObj = [];
+            var found = false;
+            var name = document.getElementById("searchName").value;
+            var subject = document.getElementById("searchSubject").value;
+            var email = document.getElementById("searchMail").value;
+            var user_location = document.getElementById("searchLocation").value;
+            console.log("name = " + name + " subject = " + subject + " email = " + email + " location = " + " user_location");
+            // All fields are empty
+            if (name == "" && subject == "" && email == "" && user_location == "") {
+                swal("אין נתונים", "מלא/י לפחות את אחד השדות לחיפוש");
+                return;
+            }
+            //Retrieve users from DB
+            $http.get('/getUser')
+                .success(function (res) {
+                    for(var i = 0; i < res.length; i++) {
+                        if(name != "") {
+                            if((!res[i].sirName.search(name)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                console.log(res[i]);
+                                found = true;
+                            }
+                        }
+                        else if(subject != "") {
+                            if ((!res[i].subject.search(subject)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                console.log(res[i]);
+                                found = true;
+                            }
+                        }
+                        else if(email != "") {
+                            if ((!res[i].email.search(email)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                console.log(res[i]);
+                                found = true;
+                            }
+                        }
+                        else if(user_location != "") {
+                            if ((!res[i].location.search(user_location)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                console.log(res[i]);
+                                found = true;
+                            }
+                        }
+                    }
+                    // No results has founded
+                    if (!found)
+                    {
+                        swal("אין תוצאות", "אין תוצאות התואמות את נתוני החיפוש שהוכנסו");
+                    }
+                })
+                .catch(function (err) {
+                    console.log(err);
+                });
+        };
+
+        $scope.clearSearch = function () {
+            $scope.searchObj = [];
+            document.getElementById("searchName").value = "";
+            document.getElementById("searchSubject").value = "";
+            document.getElementById("searchMail").value = "";
+            document.getElementById("searchLocation").value = "";
+        };
+
+        $scope.gotoVisit = function(user) {
+            $http.get('/getUser')
+                .success(function (res) {
+                    for(var i = 0; i < res.length; i++) {
+                        //alert("res[i].email = " + res[i].email);
+                        if (user.email == res[i].email) {
+                            localStorage.setItem("titleName", res[i].sirName);
+                            localStorage.setItem("titleLastName", res[i].familyName);
+                            localStorage.setItem("titleLocation", res[i].location);
+                            localStorage.setItem("titleSubject", res[i].subject);
+                            localStorage.setItem("owner", res[i].email);
+                            localStorage.setItem("titleBusinessName", res[i].businessName);
+                            localStorage.setItem("phoneNumber", res[i].phoneNumber);
+                            window.location.href = "/visitProfile";
+                        }
+                    }
+                }).catch(function (err) {
+                console.log(err);
+            });
+
+        };
+
+
+
+        // Setting for Google search API
+        var mapOptions = {
+            center: new google.maps.LatLng(-33.8688, 151.2195),
+            zoom: 13,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+
+        var input = document.getElementById('searchLocation');
+        var autocomplete = new google.maps.places.Autocomplete(input);
+
+        autocomplete.bindTo('bounds', map);
+
+        var infowindow = new google.maps.InfoWindow();
+        var marker = new google.maps.Marker({
+            map: map
+        });
+
+        google.maps.event.addListener(autocomplete, 'place_changed', function () {
+            infowindow.close();
+            marker.setVisible(false);
+            input.className = '';
+            var place = autocomplete.getPlace();
+            if (!place.geometry) {
+                // Inform the user that the place was not found and return.
+                input.className = 'notfound';
+                return;
+            }
+
+            // If the place has a geometry, then present it on a map.
+            if (place.geometry.viewport) {
+                map.fitBounds(place.geometry.viewport);
+            } else {
+                map.setCenter(place.geometry.location);
+                map.setZoom(17); // Why 17? Because it looks good.
+            }
+            marker.setIcon( /** @type {google.maps.Icon} */ ({
+                url: place.icon,
+                size: new google.maps.Size(71, 71),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(17, 34),
+                scaledSize: new google.maps.Size(35, 35)
+            }));
+            marker.setPosition(place.geometry.location);
+            marker.setVisible(true);
+
+            var address = '';
+            if (place.address_components) {
+                address = [
+                    (place.address_components[0] && place.address_components[0].short_name || ''), (place.address_components[1] && place.address_components[1].short_name || ''), (place.address_components[2] && place.address_components[2].short_name || '')].join(' ');
+            }
+
+            infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
+            infowindow.open(map, marker);
+        });
+
+
+
+    }]);
