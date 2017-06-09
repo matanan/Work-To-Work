@@ -16,12 +16,26 @@ var profile = require('./routes/profile');
 var visitProfile = require('./routes/visitProfile');
 var editProfile = require('./routes/editProfile');
 
-
 // Connect to the DB
+// Increase the connection timeout requests
+var options = {
+    server: {
+        socketOptions: {
+            keepAlive: 300000, connectTimeoutMS: 30000
+        }
+    },
+    replset: {
+        socketOptions: {
+            keepAlive: 300000,
+            connectTimeoutMS : 30000
+        }
+    }
+};
 var mongoose = require('mongoose');
 var fs = require("fs");
+var pic = require("mongoose/lib/model.js");
 var Schema = mongoose.Schema;
-mongoose.connect('mongodb://matanan:Matan123@ds052819.mlab.com:52819/worktowork');
+mongoose.connect('mongodb://matanan:Matan123@ds052819.mlab.com:52819/worktowork', options);
 var db = mongoose.connection;
 db.on('error', console.error);
 db.once('open', function() {
@@ -235,29 +249,38 @@ var pictureSchema = new Schema ({
     title: String,
     data: String
 });
-
 var Picture = mongoose.model('Picture', pictureSchema);
 
 app.post('/uploadPic', multipartMiddleware, function(req, res) {
-    console.log("file = " + file);
     var file = req.files.file;
+    console.log("file = " + file);
     var pic = new Picture;
     var bitmap = fs.readFileSync(file.path);
-    pic.data = bitmap.toString('base64');
+    //pic.data = bitmap.toString('base64');
+    pic.data = bitmap;
     pic.title = req.body.title;
     pic.owner = req.body.owner;
-    console.log(pic.data);
+    console.log("pic.title = " +pic.title);
+    console.log("pic.data = " + pic.data);
     pic.save(function(err){
         if(err)
             throw err;
         });
     res.json('Picture saved.');
 });
-
+// {owner: req.body},
 app.get('/getPic', function (req, res) {
-   Picture.find({owner: req.body.owner}, function (err, content) {
-       console.log("before = " + res);
+   Picture.find(function (err, content) {
+       console.log("content = " + content);
        res.json(content);
+   });
+});
+
+
+
+app.post('/deletePic', function (req, res) {
+   Picture.findOne({_id: req.body._id }, function (err, content) {
+       console.log(content);
    });
 });
 

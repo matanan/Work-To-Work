@@ -1,13 +1,49 @@
 angular.module('registration', [])
     .controller('RegistrationController',['$scope', '$http', '$window', function($scope, $http, $window){
         // Name of Tab
+        //noinspection JSValidateTypes
         document.title = "Work-To-Work";
+        // Call the init function on page loading
+        window.onload = init;
+
+        //-------------------- Variables Definitions ---------------------
+
         var formIsFull = false;
         var equalsPass = false;
         var exist = false;
         var mailExist = false;
         var passIncorrect = false;
         var justRegistered = false;
+        var TIMEOUT = 1000;
+
+        //-------------------- Objects Definitions ---------------------
+
+        // Create the fields for the Object "userObj"
+        $scope.userObj = {};
+        $scope.userObj.firstname = "";
+        $scope.userObj.lastname = "";
+        $scope.userObj.emailnew = "";
+        $scope.userObj.phoneNumber = "";
+        $scope.userObj.location = "";
+        $scope.userObj.businessName = "";
+        $scope.userObj.subject = "";
+        $scope.userObj.seniority = "";
+        $scope.userObj.passnew = "";
+        $scope.userObj.repassnew = "";
+        $scope.userObj.bDate = "";
+
+        // Create the fields for the Object "loginObj"
+        $scope.loginObj = {};
+        $scope.loginObj.userName = "";
+        $scope.loginObj.password = "";
+
+        // Create the fields for updating the user's password in case password forgotten
+        $scope.userObj = {};
+        $scope.userObj.passnew = makeRandomPass();
+        $scope.userObj.email = "";
+
+        //------------------------ Setting for Google search API ------------------------
+
         var mapOptions = {
             center: new google.maps.LatLng(-33.8688, 151.2195),
             zoom: 13,
@@ -63,26 +99,13 @@ angular.module('registration', [])
             infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
             infowindow.open(map, marker);
         });
-        
 
-        
-        // Create the fields for the Object "user"
-        $scope.userObj = {};
-        $scope.userObj.firstname = "";
-        $scope.userObj.lastname = "";
-        $scope.userObj.emailnew = "";
-        $scope.userObj.phoneNumber = "";
-        $scope.userObj.location = "";
-        $scope.userObj.businessName = "";
-        $scope.userObj.subject = "";
-        $scope.userObj.seniority = "";
-        $scope.userObj.passnew = "";
-        $scope.userObj.repassnew = "";
-        $scope.userObj.bDate = "";
+        //-------------------- FUNCTIONS ---------------------
 
-        $scope.loginObj = {};
-        $scope.loginObj.userName = "";
-        $scope.loginObj.password = "";
+        function init() {
+            // Clear form
+             document.getElementById("pass").value = "";
+        }
 
         // Get method that takes out the wanted information from DB about user when one is logging in
         $scope.enter = function(){
@@ -91,14 +114,8 @@ angular.module('registration', [])
                     for(var i = 0; i < res.length; i++) {
                         //User just registered - enter his profile
                         if (justRegistered) {
-                            // Save data in LocalStorage so I can use it later in the page
-                            localStorage.setItem("titleName", $scope.userObj.firstname);
-                            localStorage.setItem("titleLastName", $scope.userObj.lastname);
-                            localStorage.setItem("titleLocation", $scope.userObj.location);
-                            localStorage.setItem("titleSubject", $scope.userObj.subject);
+                            // Save owner's email address in LOCAL-STORAGE for retrieving his data
                             localStorage.setItem("owner", $scope.userObj.emailnew);
-                            localStorage.setItem("titleBusinessName", $scope.userObj.businessName);
-                            localStorage.setItem("phoneNumber", $scope.userObj.phoneNumber);
                             $window.location.href = "/profile";
                             return;
                         }
@@ -150,10 +167,8 @@ angular.module('registration', [])
         {
             var text = "";
             var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
             for( var i=0; i < 5; i++ )
                 text += possible.charAt(Math.floor(Math.random() * possible.length));
-
             return text;
         }
 
@@ -163,12 +178,7 @@ angular.module('registration', [])
             return re.test(email);
         }
 
-
-        // Create the fields for updating the user's password in case password forgotten 
-        $scope.userObj = {};
-        $scope.userObj.passnew = makeRandomPass();
-        $scope.userObj.email = "";
-
+        // Function that sends a new password to a user only if he exist in the DB
         $scope.forgetPassword = function () {
             var exist;
             swal({
@@ -182,6 +192,7 @@ angular.module('registration', [])
                     confirmButtonText: "שלח",
                     cancelButtonText: "ביטול"
                 },
+                // Check the input
                 function(inputValue){
                     // Email address invalid
                     if (!validateEmail(inputValue)) {
@@ -197,7 +208,6 @@ angular.module('registration', [])
                     $http.get('/getUser')
                             .success(function (res) {
                                 for(var i = 0; i < res.length; i++) {
-                                    // alert("res[i].email = " + res[i].email);
                                     if (inputValue == res[i].email){
                                         exist = true;
                                         break;
@@ -227,87 +237,86 @@ angular.module('registration', [])
                 });
         };
 
-            // Function that checks that the form is full as expected before adding user to DB
-            $scope.checkForm = function(){
-                $http.get('/getUser')
-                    .success(function (res) {
-                        for (var i = 0; i < res.length; i++) {
+        // Function that checks that the form is full as expected before adding user to DB
+        $scope.checkForm = function(){
+            $http.get('/getUser')
+                .success(function (res) {
+                    for (var i = 0; i < res.length; i++) {
+                        //alert("res[i].mail = " + res[i].email + " email new = " + $scope.userObj.emailnew);
+                        if (res[i].email == $scope.userObj.emailnew) {
                             //alert("res[i].mail = " + res[i].email + " email new = " + $scope.userObj.emailnew);
-                            if (res[i].email == $scope.userObj.emailnew) {
-                                //alert("res[i].mail = " + res[i].email + " email new = " + $scope.userObj.emailnew);
-                                mailExist = true;
-                                break;
-                            }
+                            mailExist = true;
+                            break;
                         }
-                    }).catch(function (err) {
-                    console.log(err);
+                    }
+                }).catch(function (err) {
+                console.log(err);
+            });
+            // Check if all fields are filled in
+            if ($scope.userObj.firstname == undefined || $scope.userObj.lastname == undefined || $scope.userObj.emailnew == undefined ||
+                $scope.userObj.location == undefined ||$scope.userObj.businessName == undefined || $scope.userObj.subject == undefined ||
+                $scope.userObj.seniority == undefined || $scope.userObj.passnew == undefined || $scope.userObj.repassnew == undefined ||
+                $scope.userObj.phoneNumber == undefined)
+            {
+                swal({
+                    title: "מלא את כל השדות",
+                    text: "אנא בדוק כי מילאת את כל השדות כראוי",
+                    type: "error",
+                    confirmButtonText: "OK"
                 });
-                // Check if all fields are filled in
-                if ($scope.userObj.firstname == undefined || $scope.userObj.lastname == undefined || $scope.userObj.emailnew == undefined ||
-                    $scope.userObj.location == undefined ||$scope.userObj.businessName == undefined || $scope.userObj.subject == undefined ||
-                    $scope.userObj.seniority == undefined || $scope.userObj.passnew == undefined || $scope.userObj.repassnew == undefined ||
-                    $scope.userObj.phoneNumber == undefined)
-                {
-                    swal({
-                        title: "מלא את כל השדות",
-                        text: "אנא בדוק כי מילאת את כל השדות כראוי",
-                        type: "error",
-                        confirmButtonText: "OK"
-                    });
+            }
+            else
+                formIsFull = true;
+            // Check password's validation
+            if (formIsFull && ($scope.userObj.passnew != $scope.userObj.repassnew)){
+                equalsPass = false;
+                swal({
+                    title: "סיסמא שגויה!",
+                    text: "אנא ודא/י כי הסיסמאות תואמות",
+                    type: "error",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+            else{
+                equalsPass = true;
+            }
+            // User exists in the DB
+            if (mailExist) {
+                swal({
+                    title: "משתמש קיים!",
+                    text: "משתמש קיים במערכת עם כתובת מייל זהה",
+                    type: "error",
+                    confirmButtonText: "OK"
+                });
+                return;
+            }
+            // If all good - add the user to the DB
+            if (!mailExist && formIsFull && equalsPass) {
+                alert("goto adduser()");
+                $scope.addUser();
+            }
+        };
 
-                }
-                else
-                    formIsFull = true;
-                if (formIsFull && ($scope.userObj.passnew != $scope.userObj.repassnew)){
-                    equalsPass = false;
-                    swal({
-                        title: "סיסמא שגויה!",
-                        text: "אנא ודא/י כי הסיסמאות תואמות",
-                        type: "error",
-                        confirmButtonText: "OK"
-                    });
-                    return;
-                }
-                else{
-                    equalsPass = true;
-                }
-                if (mailExist) {
-                    swal({
-                        title: "משתמש קיים!",
-                        text: "משתמש קיים במערכת עם כתובת מייל זהה",
-                        type: "error",
-                        confirmButtonText: "OK"
-                    });
-                    return;
-                }
-                // If all good - add the user to the DB
-                if (!mailExist && formIsFull && equalsPass) {
-                    alert("goto adduser()");
-                    $scope.addUser();
-                }
-
-            };
-
-            // This function add the user to DB
-            $scope.addUser = function(){
-                $http.post('/addUser', $scope.userObj)
-                    .success(function() {
-                            justRegistered = true;
-                            console.log('User added successfully');
-                            //swal("משתמש נוסף בהצלחה!", "הנך מועבר לעמוד הפרופיל שלך", "success");
-                            setTimeout(function() {
-                            swal({
-                                title: "משתמש נוסף בהצלחה!",
-                                text: "הנך מועבר/ת לעמוד הפרופיל האישי",
-                                type: "success"
-                                }, function() {
-                                    $scope.enter();
-                                });
-                             }, 1000);
-                      })
-                     .catch(function(err) {
-                          console.log('User add error' + err);
-                    });
-                };
-        
+        // This function adds a user to DB
+        $scope.addUser = function(){
+            $http.post('/addUser', $scope.userObj)
+                .success(function() {
+                    justRegistered = true;
+                    console.log('User added successfully');
+                    setTimeout(function() {
+                        swal({
+                            title: "משתמש נוסף בהצלחה!",
+                            text: "הנך מועבר/ת לעמוד הפרופיל האישי",
+                            type: "success"
+                        }, function() {
+                            // User added successfully - Go to home page
+                            $scope.enter();
+                        });
+                    }, TIMEOUT);
+                })
+                .catch(function(err) {
+                    console.log('User add error' + err);
+                });
+        };
     }]);

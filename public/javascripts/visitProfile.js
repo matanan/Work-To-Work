@@ -1,8 +1,11 @@
 angular.module('visitProfile', [])
     .controller('VisitController',['$scope', '$http', '$window', function($scope, $http, $window) {
         // Name of Tab
-        document.title = "Work-To-Work - visitProfile";
-        var localSAllow = false;
+        //noinspection JSValidateTypes
+        document.title = "Work-To-Work - Visit Profile";
+
+        //-------------------- ON LOAD ---------------------
+
         // Loading gif until page finish loading
         $(window).load(function() {
             // Animate loader off screen
@@ -10,6 +13,7 @@ angular.module('visitProfile', [])
         });
         // Check if localStorage can be used
         localSAllow = !!window.localStorage;
+
         // Get the data from LocalStorage
         $scope.titles = function (){
             $scope.titleBusinessName = localStorage.getItem("titleBusinessName");
@@ -21,8 +25,47 @@ angular.module('visitProfile', [])
             $scope.phoneNumber = localStorage.getItem("phoneNumber");
 
         };
+
         if (localSAllow)
             $scope.titles();
+
+        //-------------------- Variables Definitions ---------------------
+
+        var localSAllow = false;
+
+        // Scroll Availability
+        var SCROLL_PX = 20;
+
+        // Scroll Speed
+        var SCROLL_SPEED = 800;
+
+        // Timeout duration
+        var TIMEOUT = 2000;
+
+        //-------------------- Objects Definitions ---------------------
+
+        // Arrays
+        $scope.ownerObj = [];
+        $scope.searchObj = [];
+        $scope.ContactObject = [];
+
+        // Recommendation Object
+        $scope.RecObj = {};
+        $scope.RecObj.owner = $scope.owner;
+        $scope.RecObj.rank = "";
+        $scope.RecObj.description = "";
+        $scope.RecObj.name = "";
+        $scope.RecObj.email = "";
+
+        // Contact Object
+        $scope.ContactObj = {};
+        $scope.ContactObj.description = "";
+        $scope.ContactObj.mail = $scope.owner;
+
+        //-------------------- FUNCTIONS ---------------------
+
+        //Initialize the Editor
+        initEditor();
 
         // If exit - clear the LocalStorage
         $scope.clear = function () {
@@ -40,12 +83,6 @@ angular.module('visitProfile', [])
                 });
         };
 
-        // Email validation
-        function validateEmail(email) {
-            return !!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
-        }
-
-        $scope.ownerObj = [];
         // Retrieve recommendations from DB
         $scope.getRec = function (){
             $http.get('/getRec')
@@ -64,18 +101,6 @@ angular.module('visitProfile', [])
         };
         $scope.getRec();
 
-        $scope.RecObj = {};
-        $scope.RecObj.owner = $scope.owner;
-        $scope.RecObj.rank = "";
-        $scope.RecObj.description = "";
-        $scope.RecObj.name = "";
-        $scope.RecObj.email = "";
-
-        $scope.getRecName = function () {
-
-
-        };
-
         // This function adds a recommendation to the DB
         $scope.addRec = function () {
             // Get the ranker's email address
@@ -85,8 +110,12 @@ angular.module('visitProfile', [])
                 .success(function (res) {
                     for(var i = 0; i < res.length; i++) {
                         if ($scope.from == res[i].email) {
-                            $scope.RecObj.name = res[i].sirName;
                             $scope.RecObj.email = res[i].email;
+                            if (document.getElementById("recCheck").checked == true)
+                                $scope.RecObj.name = "אנונימי";
+                            else
+                                $scope.RecObj.name = res[i].sirName;
+
                             break;
                         }
                     }
@@ -143,24 +172,21 @@ angular.module('visitProfile', [])
                                             );
                                         }
                                     });
-                                //alert("Recommendation added successfully");
                             })
                             .catch(function (err) {
-                                console.log('Recommendation add error');
+                                console.log('Recommendation add error' + err);
                             });
                     }
-
                 }).catch(function (err) {
                 console.log(err);
             });
         };
 
-
         // When the user scrolls down 20px from the top of the document, show the button
         window.onscroll = function() {scrollFunction()};
 
         function scrollFunction() {
-            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            if (document.body.scrollTop > SCROLL_PX || document.documentElement.scrollTop > SCROLL_PX) {
                 document.getElementById("myBtn").style.display = "block";
             } else {
                 document.getElementById("myBtn").style.display = "none";
@@ -169,17 +195,15 @@ angular.module('visitProfile', [])
 
         // When the user clicks on the button, scroll to the top of the document
         $scope.topFunction = function() {
-            $('html, body').animate({scrollTop : 0},800);
+            $('html, body').animate({scrollTop : 0},SCROLL_SPEED);
         };
 
         $scope.backToProfile = function () {
-           // alert("BACK TO");
+            // Save the registered user for back to his home page
             $scope.backTo = localStorage.getItem("backUser");
             $http.get('/getUser')
                 .success(function (res) {
-
                     for(var i = 0; i < res.length; i++) {
-                       // alert("res[i].email = " + res[i].email);
                         if ($scope.backTo == res[i].email) {
                             localStorage.setItem("titleName", res[i].sirName);
                             localStorage.setItem("titleLastName", res[i].familyName);
@@ -196,21 +220,14 @@ angular.module('visitProfile', [])
             });
         };
 
-        $scope.ContactObject = [];
-        $scope.ContactObj = {};
-        $scope.ContactObj.description = "";
-        $scope.ContactObj.mail = $scope.owner;
-
         // Retrieve contacts from DB
         $scope.getContact = function (){
             $http.get('/getContact')
                 .success(function (res) {
                     for(var i = 0; i < res.length; i++) {
-                        //console.log(res[i]);
-                        //alert ("mail address: " + res[i].mail);
                         if (res[i].mail == $scope.ContactObj.mail) {
+                            // Push the object to the array
                             $scope.ContactObject.push(res[i]);
-                            //  alert($scope.ContactObject);
                             return;
                         }
                     }
@@ -221,15 +238,12 @@ angular.module('visitProfile', [])
         };
         $scope.getContact();
 
-
-
+        // Send an email from user to user
         $scope.sendEmail = function (to) {
-
             // Get the sender's mail
             $scope.from = localStorage.getItem("backUser");
-            var myForm = document.getElementById("emailBody");
+            // var myForm = document.getElementById("emailBody");
             var editor_val = CKEDITOR.instances.emailText.document.getBody().getText();
-            //alert("Send email to " + to + " from " + $scope.from  + " form_id = " + myForm.id + " Text = " + CKEDITOR.instances.emailText.getData());
             document.getElementById('emailText').value = CKEDITOR.instances.emailText.document.getBody().getText();
             if (editor_val.length < 2) {
                 sweetAlert("שגיאה!", "אנא מלא את גוף ההודעה", "error");
@@ -257,20 +271,14 @@ angular.module('visitProfile', [])
                             else {
                                 swal("בוטל", "המייל לא נשלח", "error");
                             }
-                        }, 2000);
+                        }, TIMEOUT);
                     });
             }
-             //emailjs.sendForm("gmail","test",myForm.id);
-
         };
-
-        //Initialize the Editor
-        initEditor();
 
         //Replace the <textarea id="emailText"> with an CKEditor instance.
         function initEditor() {
             CKEDITOR.replace( 'emailText', {
-
                 pluginsLoaded: function( evt )
                 {
                     var doc = CKEDITOR.document, ed = evt.editor;
@@ -282,8 +290,6 @@ angular.module('visitProfile', [])
             })
         }
 
-
-        $scope.searchObj = [];
         $scope.search = function () {
             // Clear the array after re-searching
             $scope.searchObj = [];
@@ -342,6 +348,7 @@ angular.module('visitProfile', [])
                 });
         };
 
+        // Clear the search fields function
         $scope.clearSearch = function () {
             $scope.searchObj = [];
             document.getElementById("searchName").value = "";
@@ -350,11 +357,12 @@ angular.module('visitProfile', [])
             document.getElementById("searchLocation").value = "";
         };
 
+        // Click on user name takes to his home page
         $scope.gotoVisit = function(user) {
             $http.get('/getUser')
                 .success(function (res) {
                     for(var i = 0; i < res.length; i++) {
-                        //alert("res[i].email = " + res[i].email);
+                        // Save the registered user for going back later on
                         if (user.email == res[i].email) {
                             localStorage.setItem("titleName", res[i].sirName);
                             localStorage.setItem("titleLastName", res[i].familyName);
@@ -363,7 +371,13 @@ angular.module('visitProfile', [])
                             localStorage.setItem("owner", res[i].email);
                             localStorage.setItem("titleBusinessName", res[i].businessName);
                             localStorage.setItem("phoneNumber", res[i].phoneNumber);
-                            window.location.href = "/visitProfile";
+                            // Check if the recommendation is anonymous
+                            if (user.name == "אנונימי") {
+                                sweetAlert("שגיאה!", "משתמש חסוי", "error");
+                                break;
+                            }
+                            else
+                                window.location.href = "/visitProfile";
                         }
                     }
                 }).catch(function (err) {
@@ -372,9 +386,7 @@ angular.module('visitProfile', [])
 
         };
 
-
-
-        // Setting for Google search API
+        //------------------------ Setting for Google search API ------------------------
         var mapOptions = {
             center: new google.maps.LatLng(-33.8688, 151.2195),
             zoom: 13,

@@ -1,25 +1,61 @@
 angular.module('profile', [])
     .controller('ProfileController',['$scope', '$http', '$window', function($scope, $http, $window) {
         // Name of Tab
+        //noinspection JSValidateTypes
         document.title = "Work-To-Work - Profile";
+        
+
+        //-------------------- Variables Definitions ---------------------
+
         var localSAllow = false;
         var contactExist = false;
+
+        // Scroll Availability
+        var SCROLL_PX = 20;
+
+        // Scroll Speed
+        var SCROLL_SPEED = 800;
+        //-------------------- Objects Definitions ---------------------
+
+        // Recommendation Object
+        $scope.RecObj = {};
+        $scope.RecObj.owner = $scope.owner;
+        $scope.RecObj.rank = "";
+        $scope.RecObj.description = "";
+        $scope.RecObj.name = "";
+
+        // Contact Object
+        $scope.ContactObj = {};
+        $scope.ContactObj.description = "";
+        $scope.ContactObj.mail = $scope.owner;
+
+        // Arrays
+        $scope.ContactObject = [];
+        $scope.searchObj = [];
+        $scope.ownerObj = [];
+
+
         // Check if localStorage can be used
         localSAllow = !!window.localStorage;
+
+        //-------------------- FUNCTIONS ---------------------
+
         // Get the data from LocalStorage
         $scope.titles = function (){
-            $scope.titleBusinessName = localStorage.getItem("titleBusinessName");
-            $scope.titleName = localStorage.getItem("titleName");
-            $scope.titleLastName = localStorage.getItem("titleLastName");
-            $scope.titleLocation = localStorage.getItem("titleLocation");
-            $scope.titleSubject = localStorage.getItem("titleSubject");
             $scope.owner = localStorage.getItem("owner");
-            $scope.phoneNumber = localStorage.getItem("phoneNumber");
+            // Get the owner's data
             $http.get('/getUSer')
                 .success (function (res) {
                     for (var i=0; i<res.length; i++ ){
-                        if ($scope.owner == res[i].email)
+                        if ($scope.owner == res[i].email) {
+                            $scope.titleBusinessName = res[i].businessName;
+                            $scope.titleName = res[i].sirName;
+                            $scope.titleLastName = res[i].familyName;
+                            $scope.titleLocation = res[i].location;
+                            $scope.titleSubject = res[i].subject;
+                            $scope.owner = res[i].email;
                             $scope.phoneNumber = res[i].phoneNumber;
+                        }
                     }
                 })
         };
@@ -29,42 +65,46 @@ angular.module('profile', [])
         // If exit - clear the LocalStorage
         $scope.clear = function () {
             swal({
-                    title: "האם את/ה בטוח/ה שברצונך לצאת?",
-                    type: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "OK",
-                    closeOnConfirm: false
-                },
-                function(){
-                    localStorage.clear();
-                    window.location.href = "/registration";
-                });
+                title: "האם את/ה בטוח/ה שברצונך לצאת?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "OK",
+                closeOnConfirm: false
+            }, function(){
+                localStorage.clear();
+                window.location.href = "/registration";
+            });
         };
 
-        $scope.searchObj = [];
+
         $scope.search = function () {
             // Clear the array after re-searching
             $scope.searchObj = [];
+
+            // Variable for indicates if user has found or not
             var found = false;
+
+            // Get the inputs
             var name = document.getElementById("searchName").value;
             var subject = document.getElementById("searchSubject").value;
             var email = document.getElementById("searchMail").value;
             var user_location = document.getElementById("searchLocation").value;
-            console.log("name = " + name + " subject = " + subject + " email = " + email + " location = " + " user_location");
+
             // All fields are empty
             if (name == "" && subject == "" && email == "" && user_location == "") {
                 swal("אין נתונים", "מלא/י לפחות את אחד השדות לחיפוש");
                 return;
             }
+
             //Retrieve users from DB
             $http.get('/getUser')
                 .success(function (res) {
+                    // Check which field was insert and search according this field
                     for(var i = 0; i < res.length; i++) {
                         if(name != "") {
                             if((!res[i].sirName.search(name)) && res[i].email != $scope.owner) {
                                 $scope.searchObj.push(res[i]);
-                                console.log(res[i]);
                                 found = true;
                             }
                         }
@@ -91,8 +131,7 @@ angular.module('profile', [])
                         }
                     }
                     // No results has founded
-                    if (!found)
-                    {
+                    if (!found) {
                         swal("אין תוצאות", "אין תוצאות התואמות את נתוני החיפוש שהוכנסו");
                     }
                 })
@@ -101,6 +140,7 @@ angular.module('profile', [])
                 });
         };
 
+        // Clear the search fields function
         $scope.clearSearch = function () {
             $scope.searchObj = [];
             document.getElementById("searchName").value = "";
@@ -109,14 +149,13 @@ angular.module('profile', [])
             document.getElementById("searchLocation").value = "";
         };
 
+        // Click on user name takes to his home page
         $scope.gotoVisit = function(user) {
             $http.get('/getUser')
                 .success(function (res) {
-                  //  alert("user email = " + user.email);
-                   // alert("owner email = " + $scope.owner);
+                    // Save the registered user for going back later on
                     localStorage.setItem("backUser", $scope.owner);
                     for(var i = 0; i < res.length; i++) {
-                        //alert("res[i].email = " + res[i].email);
                         if (user.email == res[i].email) {
                             localStorage.setItem("titleName", res[i].sirName);
                             localStorage.setItem("titleLastName", res[i].familyName);
@@ -131,10 +170,9 @@ angular.module('profile', [])
                     }).catch(function (err) {
                         console.log(err);
             });
-
         };
 
-        $scope.ownerObj = [];
+
         // Retrieve recommendations from DB
         $scope.getRec = function (){
             $http.get('/getRec')
@@ -157,7 +195,7 @@ angular.module('profile', [])
         window.onscroll = function() {scrollFunction()};
 
         function scrollFunction() {
-            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            if (document.body.scrollTop > SCROLL_PX || document.documentElement.scrollTop > SCROLL_PX) {
                 document.getElementById("myBtn").style.display = "block";
             } else {
                 document.getElementById("myBtn").style.display = "none";
@@ -166,37 +204,33 @@ angular.module('profile', [])
 
         // When the user clicks on the button, scroll to the top of the document
         $scope.topFunction = function() {
-            $('html, body').animate({scrollTop : 0},800);
+            $('html, body').animate({scrollTop : 0},SCROLL_SPEED);
         };
 
-        // Email validation
-        function validateEmail(email) {
-            return !!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
-        }
-
-        $scope.RecObj = {};
-        $scope.RecObj.owner = $scope.owner;
-        $scope.RecObj.rank = "";
-        $scope.RecObj.description = "";
-        $scope.RecObj.name = "";
-
-        // New object - Contact object fields
-        $scope.ContactObj = {};
-        $scope.ContactObj.description = "";
-        $scope.ContactObj.mail = $scope.owner;
-        // Array of contacts
-        $scope.ContactObject = [];
-
-
+        // // Email validation
+        // function validateEmail(email) {
+        //     return !!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
+        // }
 
         // This function adds a contact of a user to the DB
         $scope.addContact = function () {
             // Call "getContact" to check if record already exists
             $scope.getContact();
-            if ($scope.ContactObj.description == "") {swal( "אין נתונים", "מלא/י לפחות את אחד השדות לחיפוש"); }
+            if ($scope.ContactObj.description == "") {
+                swal({
+                        title: "אין נתונים",
+                        type: "warning",
+                        text: "מלא את תיבת הטקטס כדי לכתוב כמה מילים על עצמך",
+                        confirmButtonColor: "#8CD4F5",
+                        confirmButtonText: "אישור"
+                    },
+                    function(isConfirm){
+                        // If confirmed call "exit" function for update changes
+                        if (isConfirm) { location.reload(); }
+                    });
+            }
             else if(contactExist) {
                 // The record already exists in the database
-                alert("contact exists " + $scope.ContactObj.description + " owner = " + $scope.owner);
                 // Use the updateContact function for update one field in this object
                 $http.post('/updateContact', $scope.ContactObj)
                     .success (function (res) {
@@ -209,18 +243,16 @@ angular.module('profile', [])
                                 confirmButtonText: "אישור"
                             },
                             function(isConfirm){
-                                // If confirmed call exit" function for update changes
+                                // If confirmed call "exit" function for update changes
                                 if (isConfirm) { location.reload(); }
                             });
-
                     })
                     .catch(function (err) {
-                        console.log('Update contact error');
+                        console.log('Update contact error' + err);
                     })
             }
             else {
                 // New record in the database
-                alert("add new contact");
                 $http.post('/addContact', $scope.ContactObj)
                     .success(function (res) {
                         // If succeeded delete all fields
@@ -238,23 +270,20 @@ angular.module('profile', [])
                             });
                     })
                     .catch(function (err) {
-                        console.log('Contact add error');
+                        console.log('Contact add error' + err);
                     });
             }
         };
-        
 
         // Retrieve contacts from DB
         $scope.getContact = function (){
             $http.get('/getContact')
                 .success(function (res) {
                     for(var i = 0; i < res.length; i++) {
-                        //console.log(res[i]);
-                        //alert ("mail address: " + res[i].mail);
                         if (res[i].mail == $scope.ContactObj.mail) {
                             contactExist = true;
+                            // Add the object to the array
                             $scope.ContactObject.push(res[i]);
-                          //  alert($scope.ContactObject);
                             return;
                         }
                     }
@@ -262,17 +291,17 @@ angular.module('profile', [])
                 .catch(function (err) {
                     console.log(err);
                 });
-
         };
         $scope.getContact();
         
-        // Edit profile page
+        // Go to Edit profile page
         $scope.editProfile = function() {
             window.location.href = "/editProfile";
         };
 
 
-        // Setting for Google search API
+        //------------------------ Setting for Google search API ------------------------
+
         var mapOptions = {
             center: new google.maps.LatLng(-33.8688, 151.2195),
             zoom: 13,
@@ -331,5 +360,3 @@ angular.module('profile', [])
 
 
     }]);
-
-

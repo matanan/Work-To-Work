@@ -83,12 +83,10 @@
                 <input required type="text" placeholder="שם העסק" name="businessName" ng-model="userObj.businessName">
                 <input required id="searchTextField" type="text" placeholder="עיר" name="location" ng-model="userObj.location"> <br/><br/>
                 <div id="map-canvas"></div>
-
                 <input required type="text" placeholder="מקצוע" name="subject" ng-model="userObj.subject">
                 <input required type="number" placeholder="שנות ותק" min="0" name="seniority" ng-model="userObj.seniority"> <br/><br/>
-                <input required type="password" placeholder="סיסמא" name="passnew" ng-model="userObj.passnew">
+                <input required type="password" placeholder="סיסמא" name="passnew" ng-model="userObj.passnew" id="pass">
                 <input required type="password" placeholder="אימות סיסמא" name="repassnew" ng-model="userObj.repassnew"> <br/><br/>
-
                 תאריך לידה:                 <br/>
                 <input required type="date" name="birthdate" ng-model="userObj.bDate"> <br/><br/><br/>
                 <input  type="submit" value="צור משתמש" ng-click="checkForm()">
@@ -104,8 +102,6 @@
         <div class="col-md-7">
             <h6>&nbsp &#174 MATAN ANTEBI &#174;</h6>
         </div>
-
-
     </div>
 </footer>
 </div>
