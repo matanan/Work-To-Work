@@ -15,6 +15,7 @@ angular.module('registration', [])
         var passIncorrect = false;
         var justRegistered = false;
         var TIMEOUT = 1000;
+        var RANDOM_PASS_LENGTH = 5;
 
         //-------------------- Objects Definitions ---------------------
 
@@ -52,7 +53,7 @@ angular.module('registration', [])
         var map = new google.maps.Map(document.getElementById('map-canvas'),
             mapOptions);
 
-        var input = document.getElementById('searchTextField');
+        var input = document.getElementById('locationField');
         var autocomplete = new google.maps.places.Autocomplete(input);
 
         autocomplete.bindTo('bounds', map);
@@ -167,7 +168,7 @@ angular.module('registration', [])
         {
             var text = "";
             var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            for( var i=0; i < 5; i++ )
+            for( var i=0; i < RANDOM_PASS_LENGTH; i++ )
                 text += possible.charAt(Math.floor(Math.random() * possible.length));
             return text;
         }
@@ -293,7 +294,6 @@ angular.module('registration', [])
             }
             // If all good - add the user to the DB
             if (!mailExist && formIsFull && equalsPass) {
-                alert("goto adduser()");
                 $scope.addUser();
             }
         };

@@ -4,6 +4,8 @@ angular.module('editProfile', ['ngFileUpload'])
         //noinspection JSValidateTypes
         document.title = "Work-To-Work - Edit Profile";
 
+        $window.onload = loadPictures();
+
         //-------------------- Variables Definitions ---------------------
         // Max Pictures for each user
         var MAX_PICS = 2;
@@ -16,6 +18,9 @@ angular.module('editProfile', ['ngFileUpload'])
         
         // Get the owner's email address
         $scope.owner = localStorage.getItem("owner");
+
+        // Count the objects in the array
+        $scope.counter = 0;
 
         //-------------------- Objects Definitions ---------------------
         
@@ -84,7 +89,7 @@ angular.module('editProfile', ['ngFileUpload'])
                 });
             }
             // Compare the passwords (validation check)
-            else if ($scope.userObj.passnew != $scope.userObj.repassnew) {
+            else if ($scope.userObj.passnew !== $scope.userObj.repassnew) {
                 swal({
                     title: "סיסמא שגויה",
                     text: "אנא ודא/י כי הסיסמאות תואמות",
@@ -109,7 +114,7 @@ angular.module('editProfile', ['ngFileUpload'])
                                 // If confirmed call exit" function for update changes
                                 if (isConfirm) { $scope.exit(); }
                             });
-                        // Clear the fields when finished
+                        // Clear the fields when finish
                         $scope.userObj.firstname = "";
                         $scope.userObj.lastname = "";
                         $scope.userObj.phoneNumber = "";
@@ -125,7 +130,7 @@ angular.module('editProfile', ['ngFileUpload'])
                     })
             }
         };
-
+//------------------------------------------------------------------------------------------------------------------------//
         // Add new picture to the DB
         $scope.addPicture = function(file, errFiles){
             $scope.f = file;
@@ -134,14 +139,15 @@ angular.module('editProfile', ['ngFileUpload'])
         };
 
         // Using the server function to "Post" the picture in the DB
-        $scope.sendPicture = function(){
+        $scope.uploadPicture = function(){
+            document.getElementById("titleText").value = "";
             // The maximum pictures for each user is 3
-            if ($scope.pictureArray.length > MAX_PICS) {
-                swal("לא ניתן להעלות תמונות", "ניתן להעלות עד 3 תמונות", "alert");
+            if ($scope.counter > MAX_PICS) {
+                swal("לא ניתן להעלות תמונות", "ניתן להעלות עד 3 תמונות", "error");
+                return;
             }
             // Upload the picture
             if ($scope.f) {
-                $scope.f.data = encode64($scope.f.data);
                 //alert("Title = " + $scope.pictureObj.title + " Owner = " + $scope.pictureObj.owner );
                 $scope.f.upload = Upload.upload ({
                     url: '/uploadPic',
@@ -151,23 +157,21 @@ angular.module('editProfile', ['ngFileUpload'])
                 $scope.f.upload.then(function (response) {
                     $timeout(function () {
                         $scope.f.result = response.data;
-                        //console.log(response);
-                        if(response.data == 'no-support')
-                            alert('File not supported.');
-                        $scope.pictureObj.title = "";
+                        console.log("response-> " + response.data);
+                        if(response.data === 'Picture saved.')
+                            location.reload();
                     });
                 }, function (response) {
-                    if (response.status > 0)
-                        $scope.errorMsg = response.status + ': ' + response.data;
+                    // if (response.status > 0)
+                    //     $scope.errorMsg = response.status + ': ' + response.data;
                 }, function (evt) {
-                    $scope.f.progress = Math.min(100, parseInt(100.0 *
-                        evt.loaded / evt.total));
+                    $scope.f.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
                 });
             }
-            //$scope.loadPictures();
         };
 
-        $scope.base64ToArrayBuffer = function(bin)
+
+        function base64ToArrayBuffer(bin)
         {
             var length = bin.length;
             var buf = new ArrayBuffer(length);
@@ -175,130 +179,59 @@ angular.module('editProfile', ['ngFileUpload'])
             for (var i = 0; i < length; i++) {
                 arr[i] = bin.charCodeAt(i);
             }
+            console.log("****** Finish decoding *****");
+            console.log("buf = " + buf);
             return buf;
-        };
-
-
-        var keyStr = "ABCDEFGHIJKLMNOP" +
-            "QRSTUVWXYZabcdef" +
-            "ghijklmnopqrstuv" +
-            "wxyz0123456789+/" +
-            "=";
-        function encode64(input) {
-            input = escape(input);
-            var output = "";
-            var chr1, chr2, chr3 = "";
-            var enc1, enc2, enc3, enc4 = "";
-            var i = 0;
-
-            do {
-                chr1 = input.charCodeAt(i++);
-                chr2 = input.charCodeAt(i++);
-                chr3 = input.charCodeAt(i++);
-
-                enc1 = chr1 >> 2;
-                enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
-                enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
-                enc4 = chr3 & 63;
-
-                if (isNaN(chr2)) {
-                    enc3 = enc4 = 64;
-                } else if (isNaN(chr3)) {
-                    enc4 = 64;
-                }
-
-                output = output +
-                    keyStr.charAt(enc1) +
-                    keyStr.charAt(enc2) +
-                    keyStr.charAt(enc3) +
-                    keyStr.charAt(enc4);
-                chr1 = chr2 = chr3 = "";
-                enc1 = enc2 = enc3 = enc4 = "";
-            } while (i < input.length);
-
-            return output;
         }
-        function decode64(input) {
-            var output = "";
-            var chr1, chr2, chr3 = "";
-            var enc1, enc2, enc3, enc4 = "";
-            var i = 0;
 
-            // remove all characters that are not A-Z, a-z, 0-9, +, /, or =
-            var base64test = /[^A-Za-z0-9\+\/\=]/g;
-            if (base64test.exec(input)) {
-                alert("There were invalid base64 characters in the input text.\n" +
-                    "Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
-                    "Expect errors in decoding.");
-            }
-            input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+        //Function for convert base-64 to arrayBuffer( to insert into blob )
+        function fixBase64(binaryData) {
+            var binary = atob(binaryData.replace(/\s/g, ''));// decode base64 string, remove space for IE compatibility
+            var len = binary.length;         // get binary length
+            var buffer = new ArrayBuffer(len);         // create ArrayBuffer with binary length
+            var view = new Uint8Array(buffer);         // create 8-bit Array
 
-            do {
-                enc1 = keyStr.indexOf(input.charAt(i++));
-                enc2 = keyStr.indexOf(input.charAt(i++));
-                enc3 = keyStr.indexOf(input.charAt(i++));
-                enc4 = keyStr.indexOf(input.charAt(i++));
-
-                chr1 = (enc1 << 2) | (enc2 >> 4);
-                chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
-                chr3 = ((enc3 & 3) << 6) | enc4;
-
-                output = output + String.fromCharCode(chr1);
-
-                if (enc3 != 64) {
-                    output = output + String.fromCharCode(chr2);
-                }
-                if (enc4 != 64) {
-                    output = output + String.fromCharCode(chr3);
-                }
-
-                chr1 = chr2 = chr3 = "";
-                enc1 = enc2 = enc3 = enc4 = "";
-
-            } while (i < input.length);
-
-            return unescape(output);
+            // save unicode of binary data into 8-bit Array
+            for (var i = 0; i < len; i++)
+                view[i] = binary.charCodeAt(i);
+            return view;
         }
 
         // Load the pictures for the owner user from the DB using the server method - "getPic"
-        $scope.loadPictures = function () {
-            $scope.pictureArray = [];
+        function loadPictures() {
+            // Reset the counter
+            $scope.counter = 0;
             $http.get('/getPic', $scope.owner)
                 .success(function (res) {
                     for (var i=0; i < res.length; i++) {
-                        alert("scope.owner = " + $scope.owner + " res.owner = " + res[i].owner);
                        // console.log("i = " + i);
-                        if ($scope.owner == res[i].owner){
-                            //console.log("res.data = " + res[i].data);
-                           // var pic = $scope.base64ToArrayBuffer(res[i].data);
-                            //alert("res[i].title = " + res[i].title  + " res[i].owner = " + res[i].owner + " res[i].data = " + res[i].data);
+                         if ($scope.owner === res[i].owner){
+                             var base64str = res[i].data;
+                             var base64Fixed = fixBase64(base64str);//Get uint array to set in blob
+                             //Create a blob with base64Fixed and push to the array
+                             var blob = new Blob([base64Fixed], { type: "image/png" });
+                             var blobUrl = URL.createObjectURL(blob);
                             $scope.pictureObj.title = res[i].title;
-                            //$scope.pictureObj.owner = res[i].owner;
-                            var image = decode64(res[i].data);
-                            $scope.pictureObj.data = image;
-                            // alert("$scope.pictureObj.title = " + $scope.pictureObj.title);
-                            console.log("title = " + res[i].title);
+                            $scope.pictureObj.owner = res[i].owner;
+                            $scope.pictureObj.data = blobUrl;
+                            // Push the object to the array
                             $scope.pictureArray.push($scope.pictureObj);
-                            console.log($scope.pictureObj.data);
-                            //console.log("pic = " + pic);
+                            $scope.counter ++;
+                            console.log("counter = " + $scope.counter);
+                             $scope.pictureObj = {};
+                             $scope.pictureObj.owner = res[i].owner;
 
-                        }
-                        for (var j = 0; j < $scope.pictureArray.length; j++){
-                            console.log("title form array = " + $scope.pictureArray[j].title);
-                            // $scope.pictureObj.title = $scope.pictureArray[j].title;
-                        }
-                        document.getElementById("titleText").value = "";
+                         }
                     }
                 })
                 .catch(function (err) {
                     console.log(err);
                 });
-
-        };
+        }
 
         // Delete picture from the DB using the server method - "deletePic"
         $scope.deletePic = function(pic){
-            console.log("pic = " + pic);
+            console.log(pic);
             swal({
                     title: "האם את/ה בטוח?",
                     type: "warning",
@@ -309,8 +242,7 @@ angular.module('editProfile', ['ngFileUpload'])
                     closeOnConfirm: false
                 },
                 function(){
-                    $scope.pictureObj= pic;
-                    $http.post('/deletePic', $scope.pictureObj)
+                    $http.post('/deletePic', pic)
                         .success(function(res) {
                             console.log('Picture removed.');
                             swal({
@@ -318,17 +250,18 @@ angular.module('editProfile', ['ngFileUpload'])
                                 type: "success",
                                 showConfirmButton: false,
                                 timer: 2000
+                            },function () {
+                                $.when(location.reload()).done(
+                                    $window.location.href="#editPics"
+                                );
                             });
+
                         })
                         .catch(function(err) {
                             console.log('Picture remove error.');
                         });
                 });
         };
-        
-        
-        
-        
 
         //------------------------ Setting for Google search API ------------------------
         var mapOptions = {
@@ -386,6 +319,5 @@ angular.module('editProfile', ['ngFileUpload'])
             infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address);
             infowindow.open(map, marker);
         });
-
 
     }]);

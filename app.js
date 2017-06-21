@@ -251,27 +251,33 @@ var pictureSchema = new Schema ({
 });
 var Picture = mongoose.model('Picture', pictureSchema);
 
+
+
 app.post('/uploadPic', multipartMiddleware, function(req, res) {
     var file = req.files.file;
-    console.log("file = " + file);
     var pic = new Picture;
     var bitmap = fs.readFileSync(file.path);
-    //pic.data = bitmap.toString('base64');
-    pic.data = bitmap;
+    pic.data = bitmap.toString('base64');
     pic.title = req.body.title;
     pic.owner = req.body.owner;
-    console.log("pic.title = " +pic.title);
-    console.log("pic.data = " + pic.data);
-    pic.save(function(err){
-        if(err)
-            throw err;
+    // if(pic.contentType != "image/jpg" && pic.contentType != "image/jpeg")
+    // {
+    //     res.json('no-support');
+    // }
+    // else
+    // {
+        pic.save(function(err){
+            if(err)
+                throw err;
         });
-    res.json('Picture saved.');
+        res.json('Picture saved.');
+    // }
+    console.log('Picture saved.');
 });
-// {owner: req.body},
+
 app.get('/getPic', function (req, res) {
    Picture.find(function (err, content) {
-       console.log("content = " + content);
+        //console.log("content " , content);
        res.json(content);
    });
 });
@@ -279,8 +285,11 @@ app.get('/getPic', function (req, res) {
 
 
 app.post('/deletePic', function (req, res) {
-   Picture.findOne({_id: req.body._id }, function (err, content) {
-       console.log(content);
+   Picture.remove({owner: req.body.owner, title: req.body.title}, function (err, content) {
+       console.log("content in delete = " + content);
+       res.json({
+           message: 'Accounts Deleted!'
+       });
    });
 });
 

@@ -11,6 +11,7 @@ angular.module('visitProfile', [])
             // Animate loader off screen
             $(".se-pre-con").fadeOut("slow");
         });
+        $window.onload = loadPictures();
         // Check if localStorage can be used
         localSAllow = !!window.localStorage;
 
@@ -48,6 +49,8 @@ angular.module('visitProfile', [])
         $scope.ownerObj = [];
         $scope.searchObj = [];
         $scope.ContactObject = [];
+        $scope.pictureArray = [];
+
 
         // Recommendation Object
         $scope.RecObj = {};
@@ -61,6 +64,12 @@ angular.module('visitProfile', [])
         $scope.ContactObj = {};
         $scope.ContactObj.description = "";
         $scope.ContactObj.mail = $scope.owner;
+
+        // Picture object
+        $scope.pictureObj = {};
+        $scope.pictureObj.title = "";
+        $scope.pictureObj.owner = $scope.owner;
+        $scope.pictureObj.data ="";
 
         //-------------------- FUNCTIONS ---------------------
 
@@ -141,13 +150,11 @@ angular.module('visitProfile', [])
                     if (rate_value == null)
                     {
                         sweetAlert("שגיאה!", "לא הוכנס דירוג", "error");
-                        //alert("Please rank");
                         ok = false;
                     }
                     else if ($scope.RecObj.description == "")
                     {
                         sweetAlert("שגיאה!", "נמק את דירוגך בכמה מילים", "error");
-                        //alert("Please write a description");
                         ok = false;
                     }
                     // All fields are full and the recommendation will be saved in the DB
@@ -294,42 +301,138 @@ angular.module('visitProfile', [])
             // Clear the array after re-searching
             $scope.searchObj = [];
             var found = false;
+            // Variables for indicate which fields are empty nad which full
+            var nameFlag = false, subjectFlag = false, emailFlag = false, locationFlag = false;
+
+            // Get the inputs
             var name = document.getElementById("searchName").value;
             var subject = document.getElementById("searchSubject").value;
             var email = document.getElementById("searchMail").value;
             var user_location = document.getElementById("searchLocation").value;
-            console.log("name = " + name + " subject = " + subject + " email = " + email + " location = " + " user_location");
+
+            // Check which fields are not empty
+            if(name != "")
+                nameFlag = true;
+            if(subject != "")
+                subjectFlag = true;
+            if(email != "")
+                emailFlag = true;
+            if(user_location != "")
+                locationFlag = true;
+
             // All fields are empty
             if (name == "" && subject == "" && email == "" && user_location == "") {
                 swal("אין נתונים", "מלא/י לפחות את אחד השדות לחיפוש");
                 return;
             }
+
             //Retrieve users from DB
             $http.get('/getUser')
                 .success(function (res) {
+                    // Check which fields were inserted and search according these fields
                     for(var i = 0; i < res.length; i++) {
-                        if(name != "") {
-                            if((!res[i].sirName.search(name)) && res[i].email != $scope.owner) {
+                        // All fields were filled in
+                        if (nameFlag && subjectFlag && emailFlag && locationFlag) {
+                            if((!res[i].sirName.search(name)) && (!res[i].subject.search(subject)) && (!res[i].location.search(user_location)) && (!res[i].email.search(email)) && res[i].email != $scope.owner) {
                                 $scope.searchObj.push(res[i]);
-                                console.log(res[i]);
                                 found = true;
                             }
                         }
-                        else if(subject != "") {
+                        // All except location
+                        else if (nameFlag && subjectFlag && emailFlag && !locationFlag) {
+                            if((!res[i].sirName.search(name)) && (!res[i].subject.search(subject)) && (!res[i].email.search(email)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // All except email
+                        else if (nameFlag && subjectFlag && !emailFlag && locationFlag) {
+                            if((!res[i].sirName.search(name)) && (!res[i].subject.search(subject)) && (!res[i].location.search(user_location)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // All except subject
+                        else if (nameFlag && !subjectFlag && emailFlag && locationFlag) {
+                            if((!res[i].sirName.search(name)) && (!res[i].email.search(email)) && (!res[i].location.search(user_location)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // All except name
+                        else if (!nameFlag && subjectFlag && emailFlag && locationFlag) {
+                            if((!res[i].subject.search(subject)) && (!res[i].email.search(email)) && (!res[i].location.search(user_location)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // Name & Subject
+                        else if (nameFlag && subjectFlag && !emailFlag && !locationFlag) {
+                            if((!res[i].sirName.search(name)) && (!res[i].subject.search(subject)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // Name & Email
+                        else if (nameFlag && !subjectFlag && emailFlag && !locationFlag) {
+                            if((!res[i].sirName.search(name)) && (!res[i].email.search(email)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // Name & Location
+                        else if (nameFlag && !subjectFlag && !emailFlag && locationFlag) {
+                            if((!res[i].sirName.search(name)) && (!res[i].location.search(user_location)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // Subject & Email
+                        else if (!nameFlag && subjectFlag && emailFlag && !locationFlag) {
+                            if((!res[i].subject.search(subject)) && (!res[i].email.search(email)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // Subject & Location
+                        else if (!nameFlag && subjectFlag && !emailFlag && locationFlag) {
+                            if((!res[i].subject.search(subject)) && (!res[i].location.search(user_location)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // Email & Location
+                        else if (!nameFlag && !subjectFlag && emailFlag && locationFlag) {
+                            if((!res[i].email.search(email)) && (!res[i].location.search(user_location)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // Only Name
+                        else if(nameFlag && !subjectFlag && !emailFlag && !locationFlag) {
+                            if((!res[i].sirName.search(name)) && res[i].email != $scope.owner) {
+                                $scope.searchObj.push(res[i]);
+                                found = true;
+                            }
+                        }
+                        // Only Subject
+                        else if(!nameFlag && subjectFlag && !emailFlag && !locationFlag) {
                             if ((!res[i].subject.search(subject)) && res[i].email != $scope.owner) {
                                 $scope.searchObj.push(res[i]);
                                 console.log(res[i]);
                                 found = true;
                             }
                         }
-                        else if(email != "") {
+                        // Only Email
+                        else if(!nameFlag && !subjectFlag && emailFlag && !locationFlag) {
                             if ((!res[i].email.search(email)) && res[i].email != $scope.owner) {
                                 $scope.searchObj.push(res[i]);
                                 console.log(res[i]);
                                 found = true;
                             }
                         }
-                        else if(user_location != "") {
+                        // Only Location
+                        else if(!nameFlag && !subjectFlag && !emailFlag && locationFlag) {
                             if ((!res[i].location.search(user_location)) && res[i].email != $scope.owner) {
                                 $scope.searchObj.push(res[i]);
                                 console.log(res[i]);
@@ -359,6 +462,8 @@ angular.module('visitProfile', [])
 
         // Click on user name takes to his home page
         $scope.gotoVisit = function(user) {
+            // Get the ranker's email address
+            $scope.from = localStorage.getItem("backUser");
             $http.get('/getUser')
                 .success(function (res) {
                     for(var i = 0; i < res.length; i++) {
@@ -376,6 +481,10 @@ angular.module('visitProfile', [])
                                 sweetAlert("שגיאה!", "משתמש חסוי", "error");
                                 break;
                             }
+                            // Check if the visitor clicks on his name - back to profile as a owner
+                            if (user.email == $scope.from) {
+                                $scope.backToProfile();
+                            }
                             else
                                 window.location.href = "/visitProfile";
                         }
@@ -385,6 +494,56 @@ angular.module('visitProfile', [])
             });
 
         };
+
+        //Function for convert base-64 to arrayBuffer( to insert into blob )
+        function fixBase64(binaryData) {
+            var binary = atob(binaryData.replace(/\s/g, ''));// decode base64 string, remove space for IE compatibility
+            var len = binary.length;         // get binary length
+            var buffer = new ArrayBuffer(len);         // create ArrayBuffer with binary length
+            var view = new Uint8Array(buffer);         // create 8-bit Array
+
+            // save unicode of binary data into 8-bit Array
+            for (var i = 0; i < len; i++)
+                view[i] = binary.charCodeAt(i);
+            return view;
+        }
+
+        // Load the pictures for the owner user from the DB using the server method - "getPic"
+        function loadPictures() {
+            // Reset the counter
+            $scope.counter = 0;
+            $http.get('/getPic', $scope.owner)
+                .success(function (res) {
+                    for (var i=0; i < res.length; i++) {
+                        // console.log("i = " + i);
+                        if ($scope.owner === res[i].owner){
+                            var base64str = res[i].data;
+                            var base64Fixed = fixBase64(base64str);//Get uint array to set in blob
+                            //Create a blob with base64Fixed and push to the array of encrypt attachmens
+                            var blob = new Blob([base64Fixed], { type: "image/png" });
+                            var blobUrl = URL.createObjectURL(blob);
+                            // console.log("blob->"+blob);
+                            // console.log("url->"+blobUrl);
+                            $scope.pictureObj.title = res[i].title;
+                            $scope.pictureObj.owner = res[i].owner;
+                            $scope.pictureObj.data = blobUrl;
+                            // Push the object to the array
+                            $scope.pictureArray.push($scope.pictureObj);
+                            $scope.counter ++;
+                            console.log("counter = " + $scope.counter);
+
+                            // console.log("pic = " + $scope.pictureObj.data);
+                            // console.log($scope.pictureArray);
+                            $scope.pictureObj = {};
+                            $scope.pictureObj.owner = res[i].owner;
+
+                        }
+                    }
+                })
+                .catch(function (err) {
+                    console.log(err);
+                });
+        }
 
         //------------------------ Setting for Google search API ------------------------
         var mapOptions = {
