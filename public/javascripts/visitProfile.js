@@ -7,9 +7,10 @@ angular.module('visitProfile', [])
         //-------------------- ON LOAD ---------------------
 
         // Loading gif until page finish loading
-        $(window).load(function() {
-            // Animate loader off screen
-            $(".se-pre-con").fadeOut("slow");
+        $(function () {
+            $(".preload").fadeOut(2000, function () {
+                $(".content").fadeIn(1000);
+            })
         });
         $window.onload = loadPictures();
         // Check if localStorage can be used

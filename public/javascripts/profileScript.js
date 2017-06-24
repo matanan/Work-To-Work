@@ -6,10 +6,12 @@ angular.module('profile', [])
 
         //-------------------- ON LOAD ---------------------
         // Loading gif until page finish loading
-        $(window).load(function() {
-            // Animate loader off screen
-            $(".se-pre-con").fadeOut("slow");
+        $(function () {
+           $(".preload").fadeOut(3000, function () {
+               $(".content").fadeIn(1000);
+           })
         });
+
         $window.onload = loadPictures();
 
         // Get the data from LocalStorage

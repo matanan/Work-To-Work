@@ -13,9 +13,6 @@
     <script src="/javascripts/angular-route.min.js"></script>
     <script src="/javascripts/editProfileScript.js" type="text/javascript"></script>
 
-
-
-
     <!-- For Sweet-Alert -->
     <script src="javascripts/sweetalert.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/stylesheets/sweetalert.css">
@@ -131,7 +128,6 @@
                         <button class="btn-default" type="file" ngf-select="addPicture($file, $invalidFiles)" accept="image/*" ngf-max-size="10MB">בחר תמונה להעלאה</button>
                         <button ng-click="uploadPicture()">הוסף</button>
                         <br><br>
-
                         <div class="col-lg-12" ng-repeat="img in pictureArray track by $index">
                             {{$index + 1}}. <b>כותרת:</b>  {{img.title}}
                             <br>

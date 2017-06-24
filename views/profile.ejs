@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="he" ng-app="profile">
-
 <head>
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
@@ -37,9 +36,15 @@
     <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
 
 </head>
-<div id="se-pre-con"></div>
+
+
 <body dir="rtl" ng-controller="ProfileController as proCtrl">
 
+<div class = "preload">
+    <img src = "/images/default.gif"/>
+</div>
+
+<div class = "content">
 <div class="brand" id="profile">
     {{titleBusinessName}}
     <input type="image" src="/images/edit.png" alt="Submit" title="עריכת הפרופיל" ng-click="editProfile()" width="30" height="24">
@@ -144,28 +149,32 @@
     <div class="row">
         <div class="box">
             <div class="col-lg-12 text-center" id="work_pics">
-                <div id="carousel-example-generic" class="carousel slide">
-                    <hr>
-                    <h2 class="intro-text text-center">
-                        <strong>תיק עבודות</strong>
-                    </h2>
-                    <hr>
+                <hr>
+                <h2 class="intro-text text-center">
+                    <strong>תיק עבודות</strong>
+                </h2>
+                <hr>
+                <div id="carousel-example-generic" class="carousel slide" ng-if="pictureArray.length > 0">
+
                     <!-- Indicators -->
-                    <ol class="carousel-indicators hidden-xs" ng-if="pictureArray.length > 0">
-                        <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
+                    <ol class="carousel-indicators hidden-xs active">
+                        <li data-target="#carousel-example-generic" data-slide-to="0" ></li>
                         <li data-target="#carousel-example-generic" data-slide-to="1"></li>
                         <li data-target="#carousel-example-generic" data-slide-to="2"></li>
                     </ol>
 
                     <!-- Wrapper for slides -->
-                    <div class="carousel-inner" ng-repeat="picture in pictureArray" ng-if="pictureArray.length > 0">
-                        <div class="item active">
+                    <div class="carousel-inner" ng-repeat="picture in pictureArray">
+                        <li ng-if="pictureArray.length == 0">
+                            No sessions on this day.
+                        </li>
+                        <div class="item active" ng-show="pictureArray.length > 0">
                             <img class="img-responsive img-full" ng-src="{{pictureArray[0].data}}" alt="">
                         </div>
-                        <div class="item">
+                        <div class="item" ng-show="pictureArray.length > 1">
                             <img class="img-responsive img-full" ng-src="{{pictureArray[1].data}}" alt="">
                         </div>
-                        <div class="item">
+                        <div class="item" ng-show="pictureArray.length > 2">
                             <img class="img-responsive img-full" ng-src="{{pictureArray[2].data}}" alt="">
                         </div>
                     </div>
@@ -177,6 +186,9 @@
                     <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
                         <span class="icon-next"></span>
                     </a>
+                </div>
+                <div ng-if="pictureArray.length == 0">
+                    תיק העבודות ריק
                 </div>
                 </br>
                 <div class="col-lg-12">
@@ -267,7 +279,8 @@
         interval: 5000 //changes the speed
     })
 </script>
-
+</div>
 </body>
+
 
 </html>

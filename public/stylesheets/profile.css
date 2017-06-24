@@ -1,6 +1,18 @@
 head {
     font-family: 'Varela Round', sans-serif;
 }
+
+.content {
+    display: none;
+}
+
+.preload {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: 0 -50% 0 0;
+    transform: translate(-50%,-50%);
+}
 .brand {
     font-family: 'Varela Round', sans-serif;
 }
@@ -272,4 +284,6 @@ input.notfound {
     height: 100%;
     width:100%;
 }
+
+
 

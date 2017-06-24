@@ -50,7 +50,12 @@
 </head>
 
 <body dir="rtl" ng-controller="VisitController as vstCtrl">
-<div class="se-pre-con"></div>
+<div class = "preload">
+    <img src = "/images/default.gif"/>
+</div>
+
+<div class = "content">
+
 <div class="brand" id="profile">{{titleBusinessName}}</div>
 <div class="address-bar">{{titleName}} {{titleLastName}} | {{titleLocation}} | {{titleSubject}}</div>
 
@@ -99,12 +104,13 @@
     <div class="row">
         <div class="box">
             <div class="col-lg-12 text-center" id="work_pics">
-                <div id="carousel-example-generic" class="carousel slide">
-                    <hr>
-                    <h2 class="intro-text text-center">
-                        <strong>תיק עבודות</strong>
-                    </h2>
-                    <hr>
+                <hr>
+                <h2 class="intro-text text-center">
+                    <strong>תיק עבודות</strong>
+                </h2>
+                <hr>
+                <div id="carousel-example-generic" class="carousel slide" ng-if="pictureArray.length > 0">
+
                     <!-- Indicators -->
                     <ol class="carousel-indicators hidden-xs" ng-if="pictureArray.length > 0">
                         <li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
@@ -113,7 +119,7 @@
                     </ol>
 
                     <!-- Wrapper for slides -->
-                    <div class="carousel-inner" ng-repeat="picture in pictureArray" ng-if="pictureArray.length > 0">
+                    <div class="carousel-inner" ng-repeat="picture in pictureArray">
                         <div class="item active">
                             <img class="img-responsive img-full" ng-src="{{pictureArray[0].data}}" alt="">
                         </div>
@@ -132,6 +138,9 @@
                     <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
                         <span class="icon-next"></span>
                     </a>
+                </div>
+                <div ng-if="pictureArray.length == 0">
+                    תיק העבודות ריק
                 </div>
             </div>
         </div>
@@ -200,23 +209,23 @@
                 <hr>
                 <h3 class="intro-text text-center">
                     {{titleName}} {{titleLastName}}
-                    </br></br>
+                    <br><br>
                     0{{phoneNumber}}
-                    </br></br>
+                    <br><br>
                     {{owner}}
-                    </br></br>
+                    <br><br>
                     <div class="col-lg-12 text-center" ng-repeat="contact in ContactObject">
-<b>על עצמי:</b>                        </br></br>
+<b>על עצמי:</b>                        <br><br>
                         {{contact.description}}
-                        </br></br></br></br></br>
+                        <br><br><br><br><br>
                     </div>
-                    </br></br></br></br></br>
+                    <br><br><br>
                     <form id="emailBody" class="form-email">
                         <textarea required class="form-email" id="emailText" name="text"></textarea>
-                        </br>
+                        <br>
                         <input type="submit" class="btn btn-primary pull-right" ng-click="sendEmail(owner)" value="שלח מייל" />
                     </form>
-                    </br></br>
+                    <br><br>
                 </h3>
             </div>
         </div>
@@ -301,7 +310,7 @@
         interval: 5000 //changes the speed
     })
 </script>
-
+</div>
 </body>
 
 </html>

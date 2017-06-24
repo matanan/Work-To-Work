@@ -6,6 +6,13 @@ angular.module('editProfile', ['ngFileUpload'])
 
         $window.onload = loadPictures();
 
+        // Loading gif until images finish loading
+        $(function () {
+            $(".preload").fadeOut(2000, function () {
+                $(".content").fadeIn(1000);
+            })
+        });
+
         //-------------------- Variables Definitions ---------------------
         // Max Pictures for each user
         var MAX_PICS = 2;
@@ -148,7 +155,11 @@ angular.module('editProfile', ['ngFileUpload'])
             }
             // Upload the picture
             if ($scope.f) {
-                //alert("Title = " + $scope.pictureObj.title + " Owner = " + $scope.pictureObj.owner );
+                if (!($scope.f).name.match(/.(jpg|jpeg|image)$/i))
+                {
+                    swal("קובץ אינו נתמך", "אנא העלה קובץ jpg/jpeg/image", "error");
+                    return;
+                }
                 $scope.f.upload = Upload.upload ({
                     url: '/uploadPic',
                     data: {file: $scope.f, title: $scope.pictureObj.title, owner: $scope.pictureObj.owner}
@@ -234,6 +245,7 @@ angular.module('editProfile', ['ngFileUpload'])
             console.log(pic);
             swal({
                     title: "האם את/ה בטוח?",
+                    text: "האם את/ה בטוח שברצונך למחוק את התמונה?",
                     type: "warning",
                     showCancelButton: true,
                     confirmButtonColor: "#DD6B55",
