@@ -5,8 +5,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
     <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-    <script src="/javascripts/profileScript.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.10.0/ui-bootstrap-tpls.min.js"></script>
 
     <!-- For Sweet-Alert -->
     <script src="javascripts/sweetalert.min.js"></script>
@@ -34,6 +34,7 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Josefin+Slab:100,300,400,600,700,100italic,300italic,400italic,600italic,700italic" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
+    <script src="/javascripts/profileScript.js"></script>
 
 </head>
 
@@ -154,38 +155,14 @@
                     <strong>תיק עבודות</strong>
                 </h2>
                 <hr>
-                <div id="carousel-example-generic" class="carousel slide" ng-if="pictureArray.length > 0">
-
-                    <!-- Indicators -->
-                    <ol class="carousel-indicators hidden-xs active">
-                        <li data-target="#carousel-example-generic" data-slide-to="0" ></li>
-                        <li data-target="#carousel-example-generic" data-slide-to="1"></li>
-                        <li data-target="#carousel-example-generic" data-slide-to="2"></li>
-                    </ol>
-
-                    <!-- Wrapper for slides -->
-                    <div class="carousel-inner" ng-repeat="picture in pictureArray">
-                        <li ng-if="pictureArray.length == 0">
-                            No sessions on this day.
-                        </li>
-                        <div class="item active" ng-show="pictureArray.length > 0">
-                            <img class="img-responsive img-full" ng-src="{{pictureArray[0].data}}" alt="">
+                <div ng-if="pictureArray.length > 0">
+                <carousel interval="carousel_interval">
+                    <slide ng-repeat="slide in pictureArray" active="slide.active">
+                        <img id="protfolio" ng-src="{{slide.data}}">
+                        <div class="carousel-caption">
                         </div>
-                        <div class="item" ng-show="pictureArray.length > 1">
-                            <img class="img-responsive img-full" ng-src="{{pictureArray[1].data}}" alt="">
-                        </div>
-                        <div class="item" ng-show="pictureArray.length > 2">
-                            <img class="img-responsive img-full" ng-src="{{pictureArray[2].data}}" alt="">
-                        </div>
-                    </div>
-
-                    <!-- Controls -->
-                    <a class="left carousel-control" href="#carousel-example-generic" data-slide="prev">
-                        <span class="icon-prev"></span>
-                    </a>
-                    <a class="right carousel-control" href="#carousel-example-generic" data-slide="next">
-                        <span class="icon-next"></span>
-                    </a>
+                    </slide>
+                </carousel>
                 </div>
                 <div ng-if="pictureArray.length == 0">
                     תיק העבודות ריק
@@ -266,21 +243,6 @@
         </div>
     </div>
 </footer>
-
-<!-- jQuery -->
-<script src="/javascripts/jquery.js"></script>
-
-<!-- Bootstrap Core JavaScript -->
-<script src="/javascripts/bootstrap.min.js"></script>
-
-<!-- Script to Activate the Carousel -->
-<script>
-    $('.carousel').carousel({
-        interval: 5000 //changes the speed
-    })
-</script>
 </div>
 </body>
-
-
 </html>

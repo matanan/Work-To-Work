@@ -4,6 +4,8 @@ angular.module('editProfile', ['ngFileUpload'])
         //noinspection JSValidateTypes
         document.title = "Work-To-Work - Edit Profile";
 
+        //--------------------------- ON LOAD ---------------------------
+        // Load all images immediately
         $window.onload = loadPictures();
 
         // Loading gif until images finish loading
@@ -106,6 +108,7 @@ angular.module('editProfile', ['ngFileUpload'])
             }
             // All parameters are OK - call the server function - "updateUser"
             else {
+                $scope.userObj.location = document.getElementById("searchLocation").value;
                 $http.post('/updateUser', $scope.userObj)
                     .success(function (res) {
                         console.log('User updated successfully');
@@ -137,17 +140,15 @@ angular.module('editProfile', ['ngFileUpload'])
                     })
             }
         };
-//------------------------------------------------------------------------------------------------------------------------//
+
         // Add new picture to the DB
         $scope.addPicture = function(file, errFiles){
             $scope.f = file;
             $scope.errFile = errFiles && errFiles[0];
-            $scope.showProgress = true;
         };
 
         // Using the server function to "Post" the picture in the DB
         $scope.uploadPicture = function(){
-            document.getElementById("titleText").value = "";
             // The maximum pictures for each user is 3
             if ($scope.counter > MAX_PICS) {
                 swal("לא ניתן להעלות תמונות", "ניתן להעלות עד 3 תמונות", "error");
@@ -168,32 +169,13 @@ angular.module('editProfile', ['ngFileUpload'])
                 $scope.f.upload.then(function (response) {
                     $timeout(function () {
                         $scope.f.result = response.data;
-                        console.log("response-> " + response.data);
-                        if(response.data === 'Picture saved.')
+                        if(response.data === 'Picture saved.') {
                             location.reload();
-                    });
-                }, function (response) {
-                    // if (response.status > 0)
-                    //     $scope.errorMsg = response.status + ': ' + response.data;
-                }, function (evt) {
-                    $scope.f.progress = Math.min(100, parseInt(100.0 * evt.loaded / evt.total));
+                        }
+                    })
                 });
             }
         };
-
-
-        function base64ToArrayBuffer(bin)
-        {
-            var length = bin.length;
-            var buf = new ArrayBuffer(length);
-            var arr = new Uint8Array(buf);
-            for (var i = 0; i < length; i++) {
-                arr[i] = bin.charCodeAt(i);
-            }
-            console.log("****** Finish decoding *****");
-            console.log("buf = " + buf);
-            return buf;
-        }
 
         //Function for convert base-64 to arrayBuffer( to insert into blob )
         function fixBase64(binaryData) {
@@ -215,10 +197,9 @@ angular.module('editProfile', ['ngFileUpload'])
             $http.get('/getPic', $scope.owner)
                 .success(function (res) {
                     for (var i=0; i < res.length; i++) {
-                       // console.log("i = " + i);
                          if ($scope.owner === res[i].owner){
                              var base64str = res[i].data;
-                             var base64Fixed = fixBase64(base64str);//Get uint array to set in blob
+                             var base64Fixed = fixBase64(base64str);
                              //Create a blob with base64Fixed and push to the array
                              var blob = new Blob([base64Fixed], { type: "image/png" });
                              var blobUrl = URL.createObjectURL(blob);
@@ -228,10 +209,8 @@ angular.module('editProfile', ['ngFileUpload'])
                             // Push the object to the array
                             $scope.pictureArray.push($scope.pictureObj);
                             $scope.counter ++;
-                            console.log("counter = " + $scope.counter);
-                             $scope.pictureObj = {};
-                             $scope.pictureObj.owner = res[i].owner;
-
+                            $scope.pictureObj = {};
+                            $scope.pictureObj.owner = res[i].owner;
                          }
                     }
                 })

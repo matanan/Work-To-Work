@@ -152,7 +152,6 @@ app.post('/addUser',function (req, res) {
 
 // Get function - pull data about user from DB
 app.get('/getUser', function (req,res) {
-  console.log(req.body);
   User.find(function(err, user){
     res.json(user);
   });
@@ -177,7 +176,6 @@ app.get('/getContact', function (req,res) {
 app.post('/updateUser', function (req, res){
   User.findOne({email: req.body.mail}, function (err, user) {
     if (!err) {
-      console.log(user);
       if (!user) { console.log('User update error.1'); }
       else {
         user.sirName = req.body.firstname;
@@ -226,7 +224,6 @@ app.post('/updateContact', function(req, res){
 app.post('/updatePassword', function(req, res){
     User.findOne({ email: req.body.email }, function(err, user){
         if(!err) {
-            console.log(user);
             if(!user) { console.log('User password update error.1'); }
             else {
                 user.pass = req.body.passnew;
@@ -251,8 +248,6 @@ var pictureSchema = new Schema ({
 });
 var Picture = mongoose.model('Picture', pictureSchema);
 
-
-
 app.post('/uploadPic', multipartMiddleware, function(req, res) {
     var file = req.files.file;
     var pic = new Picture;
@@ -260,24 +255,16 @@ app.post('/uploadPic', multipartMiddleware, function(req, res) {
     pic.data = bitmap.toString('base64');
     pic.title = req.body.title;
     pic.owner = req.body.owner;
-    // if(pic.contentType != "image/jpg" && pic.contentType != "image/jpeg")
-    // {
-    //     res.json('no-support');
-    // }
-    // else
-    // {
-        pic.save(function(err){
-            if(err)
-                throw err;
+    pic.save(function(err){
+        if(err)
+            throw err;
         });
         res.json('Picture saved.');
-    // }
     console.log('Picture saved.');
 });
 
 app.get('/getPic', function (req, res) {
    Picture.find(function (err, content) {
-        //console.log("content " , content);
        res.json(content);
    });
 });

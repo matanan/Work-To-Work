@@ -3,6 +3,7 @@ angular.module('registration', [])
         // Name of Tab
         //noinspection JSValidateTypes
         document.title = "Work-To-Work";
+
         // Call the init function on page loading
         window.onload = init;
 
@@ -121,8 +122,8 @@ angular.module('registration', [])
                             return;
                         }
                         // User exists but password incorrect
-                        if(res[i].email == $scope.loginObj.userName) {
-                            if(res[i].pass != $scope.loginObj.password) {
+                        if(res[i].email === $scope.loginObj.userName) {
+                            if(res[i].pass !== $scope.loginObj.password) {
                                 swal({
                                     title: "שגיאה!",
                                     text: "סיסמא שגויה!",
@@ -149,7 +150,7 @@ angular.module('registration', [])
                         }
                     }
                     // User does not exist
-                    if (exist == false) {
+                    if (exist === false) {
                         swal({
                             title: "שגיאה!",
                             text: "משתמש לא קיים",
@@ -209,7 +210,7 @@ angular.module('registration', [])
                     $http.get('/getUser')
                             .success(function (res) {
                                 for(var i = 0; i < res.length; i++) {
-                                    if (inputValue == res[i].email){
+                                    if (inputValue === res[i].email){
                                         exist = true;
                                         break;
                                     }
@@ -240,12 +241,11 @@ angular.module('registration', [])
 
         // Function that checks that the form is full as expected before adding user to DB
         $scope.checkForm = function(){
+            $scope.userObj.location = document.getElementById("locationField").value;
             $http.get('/getUser')
                 .success(function (res) {
                     for (var i = 0; i < res.length; i++) {
-                        //alert("res[i].mail = " + res[i].email + " email new = " + $scope.userObj.emailnew);
-                        if (res[i].email == $scope.userObj.emailnew) {
-                            //alert("res[i].mail = " + res[i].email + " email new = " + $scope.userObj.emailnew);
+                        if (res[i].email === $scope.userObj.emailnew) {
                             mailExist = true;
                             break;
                         }
@@ -254,10 +254,10 @@ angular.module('registration', [])
                 console.log(err);
             });
             // Check if all fields are filled in
-            if ($scope.userObj.firstname == undefined || $scope.userObj.lastname == undefined || $scope.userObj.emailnew == undefined ||
-                $scope.userObj.location == undefined ||$scope.userObj.businessName == undefined || $scope.userObj.subject == undefined ||
-                $scope.userObj.seniority == undefined || $scope.userObj.passnew == undefined || $scope.userObj.repassnew == undefined ||
-                $scope.userObj.phoneNumber == undefined)
+            if ($scope.userObj.firstname === undefined || $scope.userObj.lastname === undefined || $scope.userObj.emailnew === undefined ||
+                $scope.userObj.location === undefined ||$scope.userObj.businessName === undefined || $scope.userObj.subject === undefined ||
+                $scope.userObj.seniority === undefined || $scope.userObj.passnew === undefined || $scope.userObj.repassnew === undefined ||
+                $scope.userObj.phoneNumber === undefined)
             {
                 swal({
                     title: "מלא את כל השדות",
@@ -269,7 +269,7 @@ angular.module('registration', [])
             else
                 formIsFull = true;
             // Check password's validation
-            if (formIsFull && ($scope.userObj.passnew != $scope.userObj.repassnew)){
+            if (formIsFull && ($scope.userObj.passnew !== $scope.userObj.repassnew)){
                 equalsPass = false;
                 swal({
                     title: "סיסמא שגויה!",
