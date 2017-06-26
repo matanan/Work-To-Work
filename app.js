@@ -94,7 +94,6 @@ var Contact = mongoose.model('Contact', contactSchema);
 
 // Posting contact to DB
 app.post('/addContact', function (req, res) {
-  console.log(req.body);
   new Contact({
     description: req.body.description,
     mail: req.body.mail
@@ -110,7 +109,6 @@ app.post('/addContact', function (req, res) {
 
 // Posting a new recommendation to the DB
 app.post('/addRec', function (req, res) {
-    console.log(req.body);
   new Recommendation({
     owner: req.body.owner,
     rank: req.body.rank,
@@ -159,7 +157,6 @@ app.get('/getUser', function (req,res) {
 
 // Get function - pull data about recommendation from DB
 app.get('/getRec', function (req,res) {
-  console.log(req.body);
   Recommendation.find(function(err, recommendation){
     res.json(recommendation);
   });
@@ -167,7 +164,6 @@ app.get('/getRec', function (req,res) {
 
 // Get function - pull data about Contacts from DB
 app.get('/getContact', function (req,res) {
-  console.log(req.body);
   Contact.find(function(err, contact){
     res.json(contact);
   });
@@ -273,9 +269,8 @@ app.get('/getPic', function (req, res) {
 
 app.post('/deletePic', function (req, res) {
    Picture.remove({owner: req.body.owner, title: req.body.title}, function (err, content) {
-       console.log("content in delete = " + content);
        res.json({
-           message: 'Accounts Deleted!'
+           message: 'Picture Deleted!'
        });
    });
 });

@@ -270,7 +270,7 @@ angular.module('visitProfile', ['ui.bootstrap'])
                     function (isConfirm) {
                         setTimeout(function () {
                             if (isConfirm) {
-                                emailjs.send("gmail", "test", {
+                                emailjs.send("gmail", "SendMail", {
                                     email: to,
                                     from: $scope.from,
                                     text: CKEDITOR.instances.emailText.document.getBody().getText()
