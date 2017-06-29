@@ -142,7 +142,7 @@
                         <br>
                         &emsp;<b> חוות דעת:  </b>{{owner.description}}
                         <br>
-                        &emsp;<b>ממליץ:  </b><a href="#" ng-click="gotoVisit(owner)">{{owner.name}}</a>
+                        &emsp;<b>ממליץ:  </b><a href="#" ng-click="gotoVisit(owner)" title="לחץ כדי לעבור לפרופיל של {{owner.name}}">{{owner.name}}</a>
                         <br><br><br>
                     </div>
 
@@ -257,7 +257,7 @@
             <div class="col-lg-12" ng-repeat="user in searchObj | orderBy: 'location'">
                 <table>
                     <tr>
-                        <td><a href="#" ng-click="gotoVisit(user)"> {{user.sirName}} {{user.familyName}} {{user.emailNew}}</a></td>
+                        <td><a href="#" ng-click="gotoVisit(user)" title="לחץ כדי לעבור לפרופיל של {{user.sirName}}"> {{user.sirName}} {{user.familyName}} {{user.emailNew}}</a></td>
                         <td>{{user.location}}</td>
                         <td>{{user.subject}}</td>
                         <td>0{{user.phoneNumber}}</td>
